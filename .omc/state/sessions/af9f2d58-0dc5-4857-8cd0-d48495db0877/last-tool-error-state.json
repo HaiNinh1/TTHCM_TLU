@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:\\\\Users\\\\haini\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Workin-LSD\\\\af9f2d58-0dc5-4857-8cd0-d48495db0877\\\\scratchpad\\\\tn.txt\",\"limit\":2600}",
+  "error": "File content (61507 tokens) exceeds maximum allowed tokens (25000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.",
+  "timestamp": "2026-09-30T14:07:29.825Z",
+  "retry_count": 1
+}

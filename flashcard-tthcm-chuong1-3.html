@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashcard TTHCM chương 1–3</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--ink:#23201b;--mute:#6f675b;--line:#ddd5c5;--acc:#9b2c2c;--ok:#1f7a4d;--okbg:#e2f3e8;--bad:#b3261e;--badbg:#fbe4e1}
+@media (prefers-color-scheme:dark){:root{--bg:#191714;--card:#24211d;--ink:#ece6da;--mute:#a1988a;--line:#3b362f;--acc:#e08a7d;--ok:#6fd19c;--okbg:#1d3a2a;--bad:#ff8a80;--badbg:#45211e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.25rem;margin:0 0 12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+button,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.45;cursor:default}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.stat{color:var(--mute);font-size:.9rem;margin-left:auto;font-variant-numeric:tabular-nums}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--acc);width:0;transition:width .2s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.meta{color:var(--mute);font-size:.85rem;margin-bottom:8px}
+.q{font-size:1.1rem;font-weight:600;margin-bottom:16px}
+.opt{display:flex;gap:10px;width:100%;text-align:left;margin-bottom:9px;padding:11px 14px}
+.opt b{color:var(--acc);flex:none}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.ok b{color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt.bad b{color:var(--bad)}
+.msg{min-height:1.6em;margin:10px 0 4px;font-weight:600}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.nav{display:flex;gap:8px;margin-top:12px}
+.nav .next{margin-left:auto;background:var(--acc);border-color:var(--acc);color:#fff}
+.hint{color:var(--mute);font-size:.85rem;margin-top:14px}
+.done h2{margin:0 0 8px}
+.done li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Flashcard Tư tưởng Hồ Chí Minh – chương 1–3</h1>
+<div class="bar" id="chips"></div>
+<div class="bar">
+  <button id="shuf">Trộn câu</button>
+  <button id="mode">Chế độ: trắc nghiệm</button>
+  <button id="wrong">Ôn câu sai</button>
+  <button id="reset">Làm lại</button>
+  <span class="stat" id="stat"></span>
+</div>
+<div class="prog"><i id="prog"></i></div>
+<div class="card" id="card"></div>
+<p class="hint">Phím tắt: 1–4 hoặc A–D để chọn, Enter / → sang câu sau, ← về câu trước, Space lật thẻ (chế độ lật thẻ).</p>
+</main>
+<script>
+const ALL = [{"n": 1, "src": "Đề 1 – câu 2", "ch": 1, "q": "Việc học tập tư tưởng Hồ Chí Minh có ý nghĩa như thế nào đối với sinh viên?", "o": ["Nâng cao năng lực tư duy lý luận và phương pháp công tác.", "Bồi dưỡng phẩm chất đạo đức cách mạng và rèn luyện bản lĩnh chính trị.", "Xây dựng, rèn luyện phương pháp và phong cách công tác.", "Tất cả phương án."], "a": 3}, {"n": 2, "src": "Đề 1 – câu 8", "ch": 1, "q": "Định nghĩa tư tưởng Hồ Chí Minh đã làm rõ ý nghĩa cực kỳ quan trọng của tư tưởng Hồ Chí Minh là:", "o": ["Tài sản tinh thần vô cùng to lớn và quý giá của Đảng và dân tộc ta, mãi mãi soi đường cho sự nghiệp cách mạng của nhân dân ta giành thắng lợi.", "Tài sản tinh thần to lớn của Đảng và dân tộc.", "Sức hấp dẫn, sức sống lâu bền của Tư tưởng Hồ Chí Minh.", "Soi đường thắng lợi cho cách mạng Việt Nam."], "a": 0}, {"n": 3, "src": "Đề 2 – câu 16", "ch": 1, "q": "Đâu là một trong những cơ sở phương pháp luận nghiên cứu và học tập tư tưởng Hồ Chí Minh?", "o": ["Phương pháp lịch sử.", "Phương pháp logic.", "Bảo đảm sự thống nhất nguyên tắc tính Đảng và tính khoa học.", "Tất cả phương án."], "a": 3}, {"n": 4, "src": "Đề 1 – câu 10", "ch": 2, "q": "Hồ Chí Minh kế thừa, phát triển những tư tưởng nào của Phật giáo vào việc xây dựng xã hội mới, con người mới Việt Nam?", "o": ["Tư tưởng nhân bản, đạo đức tích cực.", "Tư tưởng nhân văn, pháp trị.", "Tư tưởng nhân văn, nhân bản.", "Tư tưởng nhân văn, đạo đức."], "a": 0}, {"n": 5, "src": "Đề 1 – câu 12", "ch": 2, "q": "Để chuẩn bị thành lập Đảng Cộng sản Việt Nam, Nguyễn Ái Quốc đã từ Liên Xô về Trung Quốc năm nào?", "o": ["1927.", "1925.", "1924.", "1923."], "a": 2}, {"n": 6, "src": "Đề 1 – câu 21", "ch": 2, "q": "Hồ Chí Minh nhận định cuộc cách mệnh ở đâu là đã thành công, và thành công đến nơi, trong đó dân chúng được hưởng cái hạnh phúc tự do, bình đẳng thật.", "o": ["Nga.", "Mỹ.", "Pháp.", "Anh."], "a": 0}, {"n": 7, "src": "Đề 1 – câu 23", "ch": 2, "q": "Tổ chức nào đã công nhận Hồ Chí Minh là “nhà văn hóa kiệt xuất của Việt Nam”?", "o": ["Tổ chức Thương mại thế giới (WTO).", "Tổ chức Giáo dục, Khoa học và Văn hóa Liệp Hiệp Quốc (Unesco).", "Tổ chức Liên Hiệp quốc (UN).", "Tổ chức Y tế thế giới (WHO)."], "a": 1}, {"n": 8, "src": "Đề 2 – câu 5", "ch": 2, "q": "Hoàn chỉnh câu sau: “Chủ nghĩa Lênin đối với chúng ta, những người cách mạng và nhân dân Việt Nam, không những là cái cẩm nang thần kỳ, không những là cái kim chỉ nam, mà còn là [...] con đường chúng ta đi tới thắng lợi cuối cùng, đi tới chủ nghĩa xã hội và chủ nghĩa cộng sản”.", "o": ["Lý luận thần kỳ.", "Định hướng thần kỳ.", "Học thuyết thần kỳ.", "Mặt trời soi sáng."], "a": 3}, {"n": 9, "src": "Đề 2 – câu 6", "ch": 2, "q": "Khi theo dõi các cuộc bàn cãi trong các chi bộ của Đảng Xã hội Pháp ở Pari, điều mà Nguyễn Ái Quốc muốn được nghe người ta thảo luận hơn cả là gì?", "o": ["Quốc tế hai rưỡi bênh vực nhân dân thuộc địa.", "Tất cả phương án.", "Quốc tế II có thể chống lại chủ nghĩa đế quốc.", "Quốc tế nào bênh vực nhân dân các nước thuộc địa."], "a": 3}, {"n": 10, "src": "Đề 2 – câu 22", "ch": 2, "q": "Chủ nghĩa Mác-Lênin là cơ sở thế giới quan và phương pháp luận của tư tưởng Hồ Chí Minh, bởi vì:", "o": ["Nhờ chủ nghĩa Mác-Lênin, Người tổng kết được kinh nghiệm của cách mạng thế giới và thực tiễn đấu tranh giải phóng dân tộc để tìm ra con đường cứu nước đúng đắn.", "Tất cả phương án.", "Chủ nghĩa Mác-Lênin đã chỉ ra con đường phải đi và cái đích phải đến của cách mạng Việt Nam.", "Đem lại cho Người thế giới quan, phương pháp luận khoa học đúng đắn để chỉ đạo hoạt động nhận thức."], "a": 1}, {"n": 11, "src": "Đề 2 – câu 25", "ch": 2, "q": "Hoàn chỉnh câu sau: “Bây giờ học thuyết nhiều, chủ nghĩa nhiều, nhưng chủ nghĩa [ ... ] là chủ nghĩa Lênin”.", "o": ["Khoa học nhất.", "Chân chính nhất, cách mệnh nhất.", "Cách mệnh nhất, chắc chắn nhất.", "Chân chính nhất, chắc chắn nhất, cách mệnh nhất."], "a": 3}, {"n": 12, "src": "Đề 1 – câu 7", "ch": 3, "q": "Tìm một câu có nội dung không đúng trong các phương án sau. Theo Hồ Chí Minh, hai giai đoạn của “Cộng sản” giống nhau ở điểm nào? (Trong tác phẩm: Thường thức chính trị - 45. Chủ nghĩa xã hội).", "o": ["Tư liệu sản xuất đều là của chung.", "Không có giai cấp áp bức bóc lột.", "Nền kinh tế phát triển, công cụ sản xuất hiện đại.", "Sức sản xuất đã phát triển cao."], "a": 3}, {"n": 13, "src": "Đề 1 – câu 15", "ch": 3, "q": "Hoàn chỉnh câu sau: “Người ta sinh ra tự do và bình đẳng về quyền lợi, và phải luôn luôn được tự do và bình đẳng về quyền lợi. Đó là [ ... ]”.", "o": ["Là quyền thiêng liêng, bất khả xâm phạm.", "Là lẽ phải không ai chối cãi được.", "Những lẽ phải không ai chối cãi được.", "Là điều không ai chối cãi được."], "a": 2}, {"n": 14, "src": "Đề 1 – câu 17", "ch": 3, "q": "Trong quan điểm của Hồ Chí Minh, tư tưởng bạo lực cách mạng gắn bó hữu cơ với tư tưởng nào?", "o": ["Tư tưởng yêu thương con người.", "Tư tưởng nhân đạo, hòa bình.", "Tư tưởng nhân văn và hòa hoãn.", "Tư tưởng nhân ái và bình đẳng."], "a": 1}, {"n": 15, "src": "Đề 1 – câu 19", "ch": 3, "q": "Quan điểm: “chỉ có thể thực hiện hoàn toàn công cuộc giải phóng các nước thuộc địa khi giai cấp vô sản giành được thắng lợi ở các nước tư bản tiên tiến” được nêu trong Những luận cương về phong trào cách mạng trong các nước thuộc địa và nửa thuộc địa tại Đại hội VI Quốc tế cộng sản, năm 1928, đã đánh giá như thế nào về vai trò, vị trí của cách mạng thuộc địa?", "o": ["Cách mạng thuộc địa có thể nổ ra và giành thắng lợi trước cách mạng vô sản ở chính quốc.", "Cách mạng thuộc địa phụ thuộc vào cách mạng vô sản ở chính quốc.", "Cách mạng thuộc địa không phụ thuộc vào cách mạng vô sản ở chính quốc.", "Cách mạng vô sản ở chính quốc phải phụ thuộc cách mạng thuộc địa."], "a": 1}, {"n": 16, "src": "Đề 1 – câu 27", "ch": 3, "q": "Theo Hồ Chí Minh, đặc trưng kinh tế nổi bật nhất của chủ nghĩa xã hội là gì?", "o": ["Sở hữu tư nhân về tư liệu sản xuất.", "Cơ cấu công - nông nghiệp hợp lý.", "Sở hữu xã hội về tư liệu sản xuất.", "Khoa học - kỹ thuật phát triển."], "a": 2}, {"n": 17, "src": "Đề 1 – câu 28", "ch": 3, "q": "Theo Hồ Chí Minh cách mạng giải phóng dân tộc muốn giành thắng lợi phải đi theo con đường?", "o": ["Cách mạng vô sản.", "Cách mạng tư sản Tân Hợi - Trung Quốc.", "Cách mạng tư sản Mỹ.", "Cách mạng tư sản."], "a": 0}, {"n": 18, "src": "Đề 2 – câu 3", "ch": 3, "q": "Câu nói sau của Hồ Chí Minh thể hiện điều gì: “Đằng sau sự phục tùng tiêu cực, người Đông Dương ẩn giấu một cái gì đang sôi sục, đang gào thét, và sẽ bùng nổ một cách ghê gớm khi thời cơ đến”.", "o": ["Niềm tin mãnh liệt vào sức mạnh vô tận của nhân dân.", "Niềm tin về lòng yêu nước của nhân dân.", "Lòng yêu nước, sức mạnh của nhân dân.", "Sức mạnh vô tận của nhân dân."], "a": 0}, {"n": 19, "src": "Đề 2 – câu 7", "ch": 3, "q": "Hoàn chỉnh câu sau: “An Nam dân tộc cách mệnh thành công thì [ ... ], [ ... ] thì công nông Pháp làm giai cấp cách mệnh cũng dễ”.", "o": ["Giai cấp tư sản Pháp yếu.", "Thực dân Pháp yếu.", "Giai cấp tư sản yếu.", "Tư bản Pháp yếu."], "a": 3}, {"n": 20, "src": "Đề 2 – câu 10", "ch": 3, "q": "Hồ Chí Minh quan niệm: Chế độ sở hữu công cộng của chủ nghĩa xã hội và phân phối theo nguyên tắc của chủ nghĩa Mác-Lênin trong kinh tế là:", "o": ["Làm theo năng lực, hưởng theo lao động, có phúc lợi xã hội.", "Làm theo năng lực, hưởng theo nhu cầu, có phúc lợi xã hội.", "Làm theo năng lực, hiệu quả kinh tế, không có phúc lợi xã hội.", "Làm theo năng lực, hưởng theo nhu cầu, không có phúc lợi xã hội."], "a": 0}, {"n": 21, "src": "Đề 2 – câu 13", "ch": 3, "q": "Khi bàn về động lực của chủ nghĩa xã hội, theo Hồ Chí Minh, ngoài các động lực bên trong cần kết hợp với động lực bên ngoài như:", "o": ["Đoàn kết quốc tế", "Sử dụng thành quả khoa học kỹ thuật thế giới.", "Tất cả phương án.", "Sức mạnh thời đại."], "a": 2}, {"n": 22, "src": "Đề 2 – câu 14", "ch": 3, "q": "Chọn luận điểm đúng với tư tưởng Hồ Chí Minh.", "o": ["Muốn tiến lên chủ nghĩa xã hội thì phải phát triển văn hóa và kinh tế.", "Muốn tiến lên chủ nghĩa xã hội thì phải phát triển kinh tế.", "Muốn tiến lên chủ nghĩa xã hội thì phải phát triển xã hội và kinh tế.", "Muốn tiến lên chủ nghĩa xã hội thì phải phát triển kinh tế và văn hóa."], "a": 3}, {"n": 23, "src": "Đề 2 – câu 15", "ch": 3, "q": "Theo Hồ Chí Minh, đặc trưng nổi bật nhất về chính trị của chủ nghĩa xã hội là gì?", "o": ["Thực hiện một nền dân chủ triệt để.", "Do nhân dân làm chủ.", "Củng cố, mở rộng Mặt trận dân tộc thống nhất.", "Đảng Cộng sản lãnh đạo."], "a": 1}, {"n": 24, "src": "Đề 2 – câu 20", "ch": 3, "q": "Về tổ chức hợp tác xã trong thời kỳ quá độ lên chủ nghĩa xã hội, Hồ Chí Minh nhấn mạnh nguyên tắc:", "o": ["Tự nguyện cùng có lợi.", "Dần dần, từ thấp đến cao.", "Chống chủ quan, gò ép, hình thức.", "Tất cả phương án."], "a": 3}, {"n": 25, "src": "Đề 2 – câu 26", "ch": 3, "q": "Theo Hồ Chí Minh, một trong những nguyên tắc xây dựng chủ nghĩa xã hội trong thời kỳ quá độ ở Việt Nam là:", "o": ["Áp dụng máy móc lập trường, quan điểm và phương pháp của chủ nghĩa Mác-Lênin.", "Học tập kinh nghiệm các nước tư bản chủ nghĩa.", "Phải giữ vững độc lập dân tộc.", "Làm giống Liên Xô."], "a": 2}, {"n": 26, "src": "Đề 2 – câu 28", "ch": 3, "q": "Theo Hồ Chí Minh, những động lực tạo nên sức mạnh tổng hợp của chủ nghĩa xã hội là:", "o": ["Sức lao động sáng tạo của nhân dân.", "Truyền thống yêu nước của dân tộc.", "Tất cả phương án.", "Sự đoàn kết cộng đồng."], "a": 2}];
+const L = 'abcd', KEY = 'tthcm-c13-v1';
+let st = {ch: 0, mode: 'quiz', order: [], i: 0, ans: {}, optOrd: {}, flip: {}};
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.order) st = s; } catch (e) {}
+const $ = id => document.getElementById(id);
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const byN = n => ALL.find(q => q.n === n);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function start(list, mix) {
+  st.order = mix ? shuffle(list.slice()) : list.slice();
+  st.i = 0; st.ans = {}; st.flip = {}; st.optOrd = {};
+  save(); render();
+}
+const pool = () => ALL.filter(q => !st.ch || q.ch === st.ch).map(q => q.n);
+function optOrder(q) {
+  // "Tất cả phương án" giữ nguyên vị trí gốc nên không trộn phương án; chỉ trộn thứ tự câu
+  return [0, 1, 2, 3];
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c])); }
+function render() {
+  document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', +b.dataset.ch === st.ch));
+  $('mode').textContent = 'Chế độ: ' + (st.mode === 'quiz' ? 'trắc nghiệm' : 'lật thẻ');
+  const n = st.order.length, done = Object.keys(st.ans).length;
+  const right = st.order.filter(k => st.ans[k] === byN(k).a).length;
+  $('stat').textContent = st.mode === 'quiz' ? `Câu ${Math.min(st.i + 1, n)}/${n} · đúng ${right} · sai ${done - right}` : `Thẻ ${Math.min(st.i + 1, n)}/${n}`;
+  $('prog').style.width = (n ? (st.mode === 'quiz' ? done : st.i + 1) / n * 100 : 0) + '%';
+  $('wrong').disabled = !st.order.some(k => k in st.ans && st.ans[k] !== byN(k).a);
+  const c = $('card');
+  if (!n) { c.innerHTML = 'Không có câu nào.'; return; }
+  if (st.i >= n) {
+    const bad = st.order.filter(k => k in st.ans && st.ans[k] !== byN(k).a);
+    c.innerHTML = `<div class="done"><h2>Xong lượt này: đúng ${right}/${n}</h2>` +
+      (bad.length ? `<p>Các câu sai, kèm đáp án đúng:</p><ul>${bad.map(k => { const q = byN(k); return `<li>${esc(q.q)}<br><b>${L[q.a]}. ${esc(q.o[q.a])}</b></li>`; }).join('')}</ul>` : '<p>Không sai câu nào.</p>') +
+      `<div class="nav"><button onclick="go(-1)">← Xem lại</button></div></div>`;
+    return;
+  }
+  const q = byN(st.order[st.i]), picked = st.ans[q.n], shown = st.mode === 'quiz' ? picked !== undefined : !!st.flip[q.n];
+  let h = `<div class="meta">Chương ${q.ch} · ${esc(q.src)}</div><div class="q">${esc(q.q)}</div>`;
+  optOrder(q).forEach(k => {
+    let cls = 'opt';
+    if (shown && k === q.a) cls += ' ok';
+    else if (shown && k === picked) cls += ' bad';
+    h += `<button class="${cls}" ${st.mode === 'quiz' && !shown ? `onclick="pick(${k})"` : 'disabled'}><b>${L[k]}.</b><span>${esc(q.o[k])}</span></button>`;
+  });
+  if (st.mode === 'quiz') h += `<div class="msg ${shown ? (picked === q.a ? 'ok' : 'bad') : ''}">${shown ? (picked === q.a ? 'Đúng.' : `Sai. Đáp án: ${L[q.a]}. ${esc(q.o[q.a])}`) : ''}</div>`;
+  else h += `<div class="msg ok">${shown ? `Đáp án: ${L[q.a]}. ${esc(q.o[q.a])}` : ''}</div>`;
+  h += `<div class="nav"><button onclick="go(-1)" ${st.i ? '' : 'disabled'}>← Trước</button>` +
+    (st.mode === 'flip' ? `<button onclick="flip()">${shown ? 'Ẩn đáp án' : 'Hiện đáp án'}</button>` : '') +
+    `<button class="next" onclick="go(1)">Sau →</button></div>`;
+  c.innerHTML = h;
+}
+function pick(k) { const q = byN(st.order[st.i]); if (st.mode !== 'quiz' || q.n in st.ans) return; st.ans[q.n] = k; save(); render(); }
+function flip() { const n = st.order[st.i]; st.flip[n] = !st.flip[n]; save(); render(); }
+function go(d) { st.i = Math.max(0, Math.min(st.order.length, st.i + d)); save(); render(); }
+[[0, 'Tất cả'], [1, 'Chương 1'], [2, 'Chương 2'], [3, 'Chương 3']].forEach(([ch, t]) => {
+  const b = document.createElement('button');
+  b.className = 'chip'; b.dataset.ch = ch;
+  b.textContent = `${t} (${ALL.filter(q => !ch || q.ch === ch).length})`;
+  b.onclick = () => { st.ch = ch; start(pool(), false); };
+  $('chips').appendChild(b);
+});
+$('shuf').onclick = () => start(pool(), true);
+$('reset').onclick = () => start(pool(), false);
+$('mode').onclick = () => { st.mode = st.mode === 'quiz' ? 'flip' : 'quiz'; save(); render(); };
+$('wrong').onclick = () => start(st.order.filter(k => k in st.ans && st.ans[k] !== byN(k).a), true);
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (k >= '1' && k <= '4') pick(+k - 1);
+  else if (L.includes(k) && k.length === 1) pick(L.indexOf(k));
+  else if (k === 'enter' || k === 'arrowright') go(1);
+  else if (k === 'arrowleft') go(-1);
+  else if (k === ' ' && st.mode === 'flip') { e.preventDefault(); flip(); }
+});
+if (!st.order.length) start(pool(), false); else render();
+</script>
+</body>
+</html>
