@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashcard TTHCM chương 4–7</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--ink:#23201b;--mute:#6f675b;--line:#ddd5c5;--acc:#9b2c2c;--ok:#1f7a4d;--okbg:#e2f3e8;--bad:#b3261e;--badbg:#fbe4e1}
+@media (prefers-color-scheme:dark){:root{--bg:#191714;--card:#24211d;--ink:#ece6da;--mute:#a1988a;--line:#3b362f;--acc:#e08a7d;--ok:#6fd19c;--okbg:#1d3a2a;--bad:#ff8a80;--badbg:#45211e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.25rem;margin:0 0 12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+button,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button:disabled{opacity:.45;cursor:default}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.stat{color:var(--mute);font-size:.9rem;margin-left:auto;font-variant-numeric:tabular-nums}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--acc);width:0;transition:width .2s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.meta{color:var(--mute);font-size:.85rem;margin-bottom:8px}
+.q{font-size:1.1rem;font-weight:600;margin-bottom:16px}
+.opt{display:flex;gap:10px;width:100%;text-align:left;margin-bottom:9px;padding:11px 14px}
+.opt b{color:var(--acc);flex:none}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.ok b{color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt.bad b{color:var(--bad)}
+.msg{min-height:1.6em;margin:10px 0 4px;font-weight:600}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.note{color:var(--mute);font-size:.9rem;border-left:3px solid var(--line);padding-left:10px;margin:6px 0}
+.nav{display:flex;gap:8px;margin-top:12px}
+.nav .next{margin-left:auto;background:var(--acc);border-color:var(--acc);color:#fff}
+.hint{color:var(--mute);font-size:.85rem;margin-top:14px}
+.done h2{margin:0 0 8px}
+.done li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Flashcard Tư tưởng Hồ Chí Minh – chương 4–7 (34 câu)</h1>
+<div class="bar" id="chips"></div>
+<div class="bar">
+  <button id="shuf">Trộn câu</button>
+  <button id="mode">Chế độ: trắc nghiệm</button>
+  <button id="wrong">Ôn câu sai</button>
+  <button id="reset">Làm lại</button>
+  <span class="stat" id="stat"></span>
+</div>
+<div class="prog"><i id="prog"></i></div>
+<div class="card" id="card"></div>
+<p class="hint">Phím tắt: 1–4 hoặc A–D để chọn, Enter / → sang câu sau, ← về câu trước, Space lật thẻ (chế độ lật thẻ).</p>
+</main>
+<script>
+const ALL = [{"n": 1, "src": "Đề 1 – câu 3 · 4.1. Bản chất của Đảng", "ch": 4, "q": "Theo tư tưởng Hồ Chí Minh, Đảng Cộng sản Việt Nam là Đảng của ai?", "o": ["Giai cấp công nhân, nhân dân lao động và của cả dân tộc Việt Nam.", "Công nông.", "Giai cấp công nhân.", "Nhân dân lao động."], "a": 0, "note": []}, {"n": 2, "src": "Đề 1 – câu 5 · 4.2.2. Công tác cán bộ", "ch": 4, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: Theo Hồ Chí Minh, “Công việc thành công hay thất bại đều do [ … ]”.", "o": ["Công việc dễ hay khó.", "Cán bộ hay hoặc dở.", "Cán bộ tốt hay kém.", "Công tác cán bộ."], "a": 2, "note": []}, {"n": 3, "src": "Đề 1 – câu 13 · 4.1.2. Sự ra đời của Đảng", "ch": 4, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: Quy luật hình thành của Đảng Cộng sản Việt Nam là sự kết hợp giữa chủ nghĩa Mác-Lênin với phong trào công nhân và […]?.", "o": ["Phong trào của giai cấp tiểu tư sản.", "Phong trào nông dân.", "Phong trào yêu nước.", "Phong trào tư sản."], "a": 2, "note": []}, {"n": 4, "src": "Đề 1 – câu 20 · 4.2.2. Công tác cán bộ (Sửa đổi lối làm việc)", "ch": 4, "q": "Trong phần về “Vấn đề cán bộ” của tác phẩm “Sửa đổi lối làm việc” (1947), Hồ Chí Minh đưa ra mấy nội dung huấn luyện cán bộ?", "o": ["2 nội dung.", "4 nội dung.", "3 nội dung.", "5 nội dung."], "a": 3, "note": ["⚠️ Đề online chấm d. 5 nội dung, nhưng giáo trình (trích Sửa đổi lối làm việc) chỉ liệt kê 4: huấn luyện nghề nghiệp, chính trị, văn hóa, lý luận; đề giấy 101 câu 25 cũng chọn “4 nội dung”. Làm đề online thì chọn 5, đề giấy thì chọn 4."]}, {"n": 5, "src": "Đề 2 – câu 12 · 4.2.3. Nguyên tắc tự phê bình và phê bình", "ch": 4, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “ [ ... ] cốt để giúp nhau sửa chữa, giúp nhau tiến bộ”.", "o": ["Mục đích của tự phê bình.", "Mục đích của sự đoàn kết thống nhất.", "Mục đích của phê bình và tự phê bình.", "Mục đích phê bình."], "a": 2, "note": []}, {"n": 6, "src": "Đề 2 – câu 17 · 4.2.3. Nguyên tắc tập trung dân chủ", "ch": 4, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “Chế độ ta là chế độ dân chủ, tư tưởng phải được tự do. Tự do là thế nào? Đối với mọi vấn đề, mọi người tự do bày tỏ ý kiến của mình, góp phần tìm ra [ … ]”.", "o": ["Chân lý.", "Lý lẽ.", "Nguyên tắc.", "Thực tiễn."], "a": 0, "note": []}, {"n": 7, "src": "Đề 2 – câu 23 · 4.2.3. Nguyên tắc xây dựng Đảng", "ch": 4, "q": "Theo Hồ Chí Minh, có mấy nguyên tắc xây dựng Đảng?", "o": ["4 nguyên tắc.", "3 nguyên tắc.", "2 nguyên tắc.", "5 nguyên tắc."], "a": 3, "note": ["5 nguyên tắc: tập trung dân chủ; tập thể lãnh đạo, cá nhân phụ trách; tự phê bình và phê bình; kỷ luật nghiêm minh, tự giác; đoàn kết thống nhất trong Đảng."]}, {"n": 8, "src": "Đề 1 – câu 14 · 5.1.3. Nhà nước vì dân", "ch": 5, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: Theo Hồ Chí Minh, “việc gì có lợi cho dân phải hết sức làm, việc gì có hại cho dân [ ... ] ”.", "o": ["Không nên làm.", "Không được làm.", "Phải hết sức tránh.", "Phải tránh."], "a": 2, "note": []}, {"n": 9, "src": "Đề 1 – câu 26 · 5.1.2. Nhà nước do dân", "ch": 5, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “Mong [ … ] giúp đỡ, đôn đốc, kiểm soát và phê bình để làm trọn nhiệm vụ của mình là người đầy tớ trung thành tận tụy của nhân dân”.", "o": ["Quần chúng.", "Nhân dân.", "Quốc dân.", "Đồng bào."], "a": 3, "note": ["Trùng đề giấy 101 câu 39."]}, {"n": 10, "src": "Đề 1 – câu 30 · 5.1.3. Nhà nước vì dân", "ch": 5, "q": "Hãy Điền từ hoặc cụm từ đúng vào dấu [ ... ]: Trong bài: Phải tẩy sạch bệnh quan liêu, Người nhấn mạnh: “Đã phụng sự nhân dân, thì phải phụng sự cho ra trò. Nghĩa là việc gì có lợi cho dân, [ ... ].Việc gì hại cho dân, thì phải hết sức tránh”.", "o": ["Thì nên làm.", "Thì phải hết sức làm.", "Thì phải làm cho kỳ được.", "Thì hãy cố gắng làm."], "a": 1, "note": ["Trùng đề giấy 101 câu 26 (khác thứ tự phương án)."]}, {"n": 11, "src": "Đề 2 – câu 4 · 5.1.1. Nhà nước của dân", "ch": 5, "q": "Theo Hồ Chí Minh, nhà nước của dân là:", "o": ["Quyền lực của nhà nước và xã hội thuộc về nhân dân.", "Quyền lực của nhà nước và xã hội thuộc về Đảng.", "Quyền lực của nhà nước và xã hội thuộc về Mặt trận Tổ quốc Việt Nam.", "Quyền lực của nhà nước và xã hội thuộc về Chính phủ."], "a": 0, "note": []}, {"n": 12, "src": "Đề 2 – câu 24 · 5.3. Nhà nước pháp quyền", "ch": 5, "q": "Điểm đặc sắc nhất trong tư tưởng Hồ Chí Minh về Nhà nước pháp quyền là:", "o": ["Coi trọng luật pháp trong quản lý xã hội.", "Đề cao đạo đức trong quản lý xã hội.", "Đảm bảo tính nghiêm minh và hiệu lực của pháp luật.", "Kết hợp nhuần nhuyễn cả pháp luật và đạo đức trong quản lý xã hội."], "a": 3, "note": []}, {"n": 13, "src": "Đề 1 – câu 1 · 6.1.1. Vai trò của đại đoàn kết – dựa vào dân", "ch": 6, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “ [ ... ] có vững thì cây mới bền; Xây lầu thắng lợi trên nền [ … ]”.", "o": ["Gốc; công nhân.", "Gốc; nhân dân.", "Rễ; công nông.", "Gốc; nông dân."], "a": 1, "note": []}, {"n": 14, "src": "Đề 1 – câu 4 · 6.1.3. Mặt trận dân tộc thống nhất", "ch": 6, "q": "Theo Hồ Chí Minh, mối quan hệ giữa Đảng và Mặt trận dân tộc thống nhất là mối quan hệ như thế nào?", "o": ["Hai chiều.", "Máu thịt.", "Phụ thuộc.", "Lãnh đạo."], "a": 1, "note": []}, {"n": 15, "src": "Đề 1 – câu 9 · 6.1.3. Nguyên tắc hoạt động của Mặt trận", "ch": 6, "q": "Theo Hồ Chí Minh, để thực hiện nguyên tắc hiệp thương dân chủ phải:", "o": ["Tất cả phương án.", "Đứng vững trên lập trường giai cấp công nhân.", "Phải làm cho tất cả thành viên trong mặt trận thấm nhuần lợi ích chung, lợi ích tối cao của dân tộc, phải đặt lợi ích chung lên trên hết, trước hết.", "Giải quyết hài hòa mối quan hệ giữa lợi ích dân tộc và lợi ích giai cấp, lợi ích chung và lợi ích riêng, lợi ích lâu dài và lợi ích trước mắt."], "a": 0, "note": []}, {"n": 16, "src": "Đề 1 – câu 22 · 6.1.1. Vai trò của đại đoàn kết", "ch": 6, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “Bây giờ còn một điểm rất quan trọng, cũng là [ .. ]. Điểm này mà thực hiện tốt thì đẻ ra con cháu đều tốt”.", "o": ["Điểm quyết định.", "Điểm thắng lợi.", "Điểm mẹ.", "Điểm bố."], "a": 2, "note": ["“…điểm mẹ. Điểm này mà thực hiện tốt thì đẻ ra con cháu đều tốt: Đó là đoàn kết”."]}, {"n": 17, "src": "Đề 1 – câu 25 · 6.1.2. Lực lượng đại đoàn kết", "ch": 6, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “Ai có tài, có đức, có sức, có lòng phụng sự Tổ quốc và phục vụ nhân dân thì ta [ ... ] với họ”.", "o": ["Chia sẻ.", "Đoàn kết.", "Hợp tác.", "Bắt tay."], "a": 1, "note": []}, {"n": 18, "src": "Đề 1 – câu 29 · 6.1.2. Lực lượng đại đoàn kết", "ch": 6, "q": "Theo Hồ Chí Minh, cả dân tộc hay toàn dân chỉ trở thành lực lượng cách mạng to lớn, trở thành sức mạnh vô địch khi được:", "o": ["Giác ngộ về mục tiêu chiến đấu chung, được tổ chức thành một khối vững chắc và hoạt động theo một đường lối chính trị đúng đắn.", "Giác ngộ về mục tiêu chiến đấu chung, được tổ chức thành một khối vững chắc và hoạt động theo nguyên tắc hiệp thương dân chủ.", "Giác ngộ về mục tiêu chiến đấu chung, được tổ chức thành tập thể vững chắc và hoạt động theo nguyên tắc hiệp thương dân chủ.", "Giác ngộ về mục tiêu cách mạng, được tổ chức lại thành một mặt trận vững chắc và hoạt động theo một đường lối chính trị đúng đắn."], "a": 0, "note": []}, {"n": 19, "src": "Đề 2 – câu 1 · 6.2.1. Sự cần thiết đoàn kết quốc tế", "ch": 6, "q": "Theo Hồ Chí Minh, đoàn kết quốc tế là nhằm góp phần cùng nhân dân thế giới thực hiện điều gì?", "o": ["Sự nghiệp giải phóng dân tộc, thống nhất đất nước.", "Tất cả phương án.", "Đi lên chủ nghĩa xã hội.", "Thắng lợi các mục tiêu cách mạng của thời đại."], "a": 3, "note": []}, {"n": 20, "src": "Đề 2 – câu 3 · 6.1.2. Niềm tin vào sức mạnh nhân dân", "ch": 6, "q": "Câu nói sau của Hồ Chí Minh thể hiện điều gì: “Đằng sau sự phục tùng tiêu cực, người Đông Dương ẩn giấu một cái gì đang sôi sục, đang gào thét, và sẽ bùng nổ một cách ghê gớm khi thời cơ đến”.", "o": ["Niềm tin mãnh liệt vào sức mạnh vô tận của nhân dân.", "Niềm tin về lòng yêu nước của nhân dân.", "Lòng yêu nước, sức mạnh của nhân dân.", "Sức mạnh vô tận của nhân dân."], "a": 0, "note": ["Câu này trước đây xếp vào bộ chương 1–3, nhưng trong giáo trình nằm ở mục 6.1.2 (niềm tin mãnh liệt vào sức mạnh nhân dân) → chuyển sang chương 6."]}, {"n": 21, "src": "Đề 2 – câu 21 · 6.1.4. Khoan dung, độ lượng", "ch": 6, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “Ta phải nhận rằng đã là con Lạc, cháu Hồng thì ai cũng có ít hay nhiều lòng ái quốc. Đối với những [ ... ], ta phải dùng tình thân ái mà cảm hóa họ”.", "o": ["Người lầm đường, lạc lối.", "Đồng bào lầm đường, lạc lối.", "Đồng bào lầm đường, lạc bước.", "Quần chúng lầm đường, lạc bước."], "a": 1, "note": []}, {"n": 22, "src": "Đề 1 – câu 6 · 7.2. Đạo đức – cần, kiệm, liêm, chính", "ch": 7, "q": "Theo Hồ Chí Minh, đối với một quốc gia, cần, kiệm, liêm, chính là thước đo:", "o": ["Bề dầy của truyền thống đạo đức của dân tộc.", "Sự giàu có về vật chất, vững mạnh về tinh thần, thể hiện sự văn minh tiến bộ của dân tộc.", "Sự giàu có của dân tộc Việt Nam.", "Sự phong phú của truyền thống văn hóa lâu đời của dân tộc."], "a": 1, "note": []}, {"n": 23, "src": "Đề 1 – câu 11 · 7.2.1. Vai trò, sức mạnh của đạo đức", "ch": 7, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: “[ … ] mới gánh được nặng và đi được xa. Người cách mạng phải có [… ] làm nền tảng mới hoàn thành được nhiệm vụ cách mạng vẻ vang”.", "o": ["Sức có mạnh - cần kiệm liêm chính.", "Đạo đức cách mạng - cần kiệm liêm chính.", "Sức có mạnh - tinh thần cách mạng.", "Sức có mạnh - đạo đức cách mạng."], "a": 3, "note": []}, {"n": 24, "src": "Đề 1 – câu 16 · 7.2. Đạo đức cách mạng", "ch": 7, "q": "Tác phẩm đầu tiên nào của Hồ Chí Minh đề cập đến đạo đức cách mạng?", "o": ["Đường cách mệnh (1927).", "Bản án chế độ thực dân Pháp (1925).", "Thường thức Chính trị (1953).", "Đạo đức cách mạng (1955)"], "a": 0, "note": []}, {"n": 25, "src": "Đề 1 – câu 18 · 7.1.3. Xây dựng nền văn hóa mới – đời sống mới", "ch": 7, "q": "Theo Hồ Chí Minh, đời sống văn hóa mới không bao gồm những mặt nào?", "o": ["Cách sống mới.", "Đạo đức mới.", "Nếp sống mới.", "Lối sống mới."], "a": 0, "note": []}, {"n": 26, "src": "Đề 1 – câu 24 · 7.1.3. Xây dựng nền văn hóa mới", "ch": 7, "q": "Theo Hồ Chí Minh, nội dung của tiếp thu tinh hoa văn hóa nhân loại là:", "o": ["Toàn diện bao gồm Đông, Tây, kim, cổ, tất cả các mặt, các khía cạnh.", "Cả những mặt tích cực và hạn chế của văn hóa nhân loại.", "Những giá trị văn hóa phương Đông.", "Những giá trị văn hóa phương Tây."], "a": 0, "note": ["Trùng đề giấy 101 câu 70."]}, {"n": 27, "src": "Đề 2 – câu 2 · 7.3.1. Quan niệm về con người", "ch": 7, "q": "Theo Hồ Chí Minh, trong mỗi con người bao giờ cũng có:", "o": ["Không xấu, không tốt.", "Chỉ mặt xấu.", "Tốt - xấu, thiện - ác.", "Chỉ mặt tốt."], "a": 2, "note": []}, {"n": 28, "src": "Đề 2 – câu 8 · 7.3.3. Xây dựng con người – Di chúc", "ch": 7, "q": "Câu nói sau được trích trong tác phẩm nào của Hồ Chí Minh: “Bồi dưỡng thế hệ cách mạng cho đời sau là việc làm rất quan trọng và cần thiết”.", "o": ["Đường cách mệnh.", "Sửa đổi lối làm việc.", "Đạo đức cách mạng.", "Di chúc."], "a": 3, "note": []}, {"n": 29, "src": "Đề 2 – câu 9 · 7.2. Đạo đức – chống chủ nghĩa cá nhân", "ch": 7, "q": "Điền từ hoặc cụm từ đúng vào dấu [ ... ]: Trong tác phẩm Nâng cao đạo đức cách mạng, quét sạch chủ nghĩa cá nhân của Hồ Chí Minh nhấn mạnh: “Tóm lại, do [ … ] mà phạm nhiều sai lầm”.", "o": ["Cá nhân chủ nghĩa.", "Mất đoàn kết, thiếu tính tổ chức.", "Ngại gian khổ, khó khăn.", "Muốn mọi người vì mình."], "a": 0, "note": []}, {"n": 30, "src": "Đề 2 – câu 11 · 7.2.1. Vai trò, sức mạnh của đạo đức", "ch": 7, "q": "Theo Hồ Chí Minh, đạo đức là nhân tố tạo nên:", "o": ["Sức mạnh sức hấp dẫn của con người mới xã hội chủ nghĩa.", "Sức mạnh sức hấp dẫn của tư tưởng Hồ Chí Minh.", "Sức hấp dẫn của chủ nghĩa xã hội.", "Sức mạnh sức hấp dẫn của chủ nghĩa Mác - Lênin."], "a": 2, "note": ["Trùng đề giấy 101 câu 17."]}, {"n": 31, "src": "Đề 2 – câu 18 · 7.3.3. Phương pháp xây dựng con người", "ch": 7, "q": "Theo Hồ Chí Minh, phương pháp xây dựng con người mới bao gồm:", "o": ["Tất cả phương án.", "Lấy gương người tốt, việc tốt hằng ngày để giáo dục lẫn nhau.", "Chú trọng công tác giáo dục - đào tạo.", "Nêu cao vai trò của tổ chức đảng, chính quyền, đoàn thể quần chúng."], "a": 0, "note": []}, {"n": 32, "src": "Đề 2 – câu 19 · 7.1.2. Vai trò của văn hóa", "ch": 7, "q": "Trong tư tưởng Hồ Chí Minh: Văn hóa có mối quan hệ mật thiết với những lĩnh vực nào của đời sống xã hội?", "o": ["Với chính trị.", "Với kinh tế.", "Tất cả các phương án.", "Với xã hội."], "a": 2, "note": ["Trùng đề giấy 101 câu 36."]}, {"n": 33, "src": "Đề 2 – câu 27 · 7.2. Đạo đức – cần, kiệm, liêm, chính", "ch": 7, "q": "Theo Hồ Chí Minh, cần, kiệm, liêm, chính là đức tính mà ai cũng phải thực hiện, song, đối với cán bộ, đảng viên thì cần phải làm gì trước để làm kiểu mẫu cho nhân dân?", "o": ["Thực hành.", "Học tập.", "Tất cả phương án", "Làm việc."], "a": 0, "note": []}, {"n": 34, "src": "Đề 2 – câu 29 · 7.2.1. Vai trò, sức mạnh của đạo đức", "ch": 7, "q": "Theo Hồ Chí Minh, người cách mạng phải có phẩm chất nào làm nền tảng mới hoàn thành được nhiệm vụ cách mạng vẻ vang?", "o": ["Đạo đức cách mạng.", "Hồng và chuyên.", "Đức và tài.", "Phẩm chất và năng lực."], "a": 0, "note": []}];
+const L = 'abcd', KEY = 'tthcm-c47-v1';
+let st = {ch: 0, mode: 'quiz', order: [], i: 0, ans: {}, optOrd: {}, flip: {}};
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.order) st = s; } catch (e) {}
+const $ = id => document.getElementById(id);
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const byN = n => ALL.find(q => q.n === n);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function start(list, mix) {
+  st.order = mix ? shuffle(list.slice()) : list.slice();
+  st.i = 0; st.ans = {}; st.flip = {}; st.optOrd = {};
+  save(); render();
+}
+const pool = () => ALL.filter(q => !st.ch || q.ch === st.ch).map(q => q.n);
+function optOrder(q) {
+  // "Tất cả phương án" giữ nguyên vị trí gốc nên không trộn phương án; chỉ trộn thứ tự câu
+  return [0, 1, 2, 3];
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c])); }
+function render() {
+  document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', +b.dataset.ch === st.ch));
+  $('mode').textContent = 'Chế độ: ' + (st.mode === 'quiz' ? 'trắc nghiệm' : 'lật thẻ');
+  const n = st.order.length, done = Object.keys(st.ans).length;
+  const right = st.order.filter(k => st.ans[k] === byN(k).a).length;
+  $('stat').textContent = st.mode === 'quiz' ? `Câu ${Math.min(st.i + 1, n)}/${n} · đúng ${right} · sai ${done - right}` : `Thẻ ${Math.min(st.i + 1, n)}/${n}`;
+  $('prog').style.width = (n ? (st.mode === 'quiz' ? done : st.i + 1) / n * 100 : 0) + '%';
+  $('wrong').disabled = !st.order.some(k => k in st.ans && st.ans[k] !== byN(k).a);
+  const c = $('card');
+  if (!n) { c.innerHTML = 'Không có câu nào.'; return; }
+  if (st.i >= n) {
+    const bad = st.order.filter(k => k in st.ans && st.ans[k] !== byN(k).a);
+    c.innerHTML = `<div class="done"><h2>Xong lượt này: đúng ${right}/${n}</h2>` +
+      (bad.length ? `<p>Các câu sai, kèm đáp án đúng:</p><ul>${bad.map(k => { const q = byN(k); return `<li>${esc(q.q)}<br><b>${L[q.a]}. ${esc(q.o[q.a])}</b></li>`; }).join('')}</ul>` : '<p>Không sai câu nào.</p>') +
+      `<div class="nav"><button onclick="go(-1)">← Xem lại</button></div></div>`;
+    return;
+  }
+  const q = byN(st.order[st.i]), picked = st.ans[q.n], shown = st.mode === 'quiz' ? picked !== undefined : !!st.flip[q.n];
+  let h = `<div class="meta">Chương ${q.ch} · ${esc(q.src)}</div><div class="q">${esc(q.q)}</div>`;
+  optOrder(q).forEach(k => {
+    let cls = 'opt';
+    if (shown && k === q.a) cls += ' ok';
+    else if (shown && k === picked) cls += ' bad';
+    h += `<button class="${cls}" ${st.mode === 'quiz' && !shown ? `onclick="pick(${k})"` : 'disabled'}><b>${L[k]}.</b><span>${esc(q.o[k])}</span></button>`;
+  });
+  if (st.mode === 'quiz') h += `<div class="msg ${shown ? (picked === q.a ? 'ok' : 'bad') : ''}">${shown ? (picked === q.a ? 'Đúng.' : `Sai. Đáp án: ${L[q.a]}. ${esc(q.o[q.a])}`) : ''}</div>`;
+  else h += `<div class="msg ok">${shown ? `Đáp án: ${L[q.a]}. ${esc(q.o[q.a])}` : ''}</div>`;
+  if (shown && q.note.length) h += `<div class="note">${q.note.map(esc).join('<br>')}</div>`;
+  h += `<div class="nav"><button onclick="go(-1)" ${st.i ? '' : 'disabled'}>← Trước</button>` +
+    (st.mode === 'flip' ? `<button onclick="flip()">${shown ? 'Ẩn đáp án' : 'Hiện đáp án'}</button>` : '') +
+    `<button class="next" onclick="go(1)">Sau →</button></div>`;
+  c.innerHTML = h;
+}
+function pick(k) { const q = byN(st.order[st.i]); if (st.mode !== 'quiz' || q.n in st.ans) return; st.ans[q.n] = k; save(); render(); }
+function flip() { const n = st.order[st.i]; st.flip[n] = !st.flip[n]; save(); render(); }
+function go(d) { st.i = Math.max(0, Math.min(st.order.length, st.i + d)); save(); render(); }
+[[0, 'Tất cả'], [4, 'Chương 4'], [5, 'Chương 5'], [6, 'Chương 6'], [7, 'Chương 7']].forEach(([ch, t]) => {
+  const b = document.createElement('button');
+  b.className = 'chip'; b.dataset.ch = ch;
+  b.textContent = `${t} (${ALL.filter(q => !ch || q.ch === ch).length})`;
+  b.onclick = () => { st.ch = ch; start(pool(), false); };
+  $('chips').appendChild(b);
+});
+$('shuf').onclick = () => start(pool(), true);
+$('reset').onclick = () => start(pool(), false);
+$('mode').onclick = () => { st.mode = st.mode === 'quiz' ? 'flip' : 'quiz'; save(); render(); };
+$('wrong').onclick = () => start(st.order.filter(k => k in st.ans && st.ans[k] !== byN(k).a), true);
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (k >= '1' && k <= '4') pick(+k - 1);
+  else if (k.length === 1 && 'abcd'.includes(k)) pick('abcd'.indexOf(k));
+  else if (k === 'enter' || k === 'arrowright') go(1);
+  else if (k === 'arrowleft') go(-1);
+  else if (k === ' ' && st.mode === 'flip') { e.preventDefault(); flip(); }
+});
+if (!st.order.length) start(pool(), false); else render();
+</script>
+</body>
+</html>
