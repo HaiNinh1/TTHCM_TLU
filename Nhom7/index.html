@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nhóm 7 · Xây dựng CNXH thời kỳ quá độ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ddcfa6;   /* kaki cũ */
+  --text:#141210; --muted:#141210; --dim:#141210; --box:#cbb98a;
+  --red:#141210;
+  --line:#141210;
+  --sans:"Be Vietnam Pro","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0!important}
+html,body{height:100%;background:#000;overflow:hidden}
+body{font-family:var(--sans);color:var(--text)}
+#stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%}
+.slide{position:absolute;inset:0;overflow:hidden;display:none;background:var(--bg)}
+.slide.on{display:block}
+
+.pad{position:absolute;inset:0;padding:48px 80px 48px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.kick{font:700 32px/1.2 var(--sans)}
+.kick .no{margin-right:10px}
+.kick .no::after{content:" -"}
+h1,h2{font-weight:800;line-height:1.15}
+h2{font-size:68px}
+h2 em,h1 em{font-style:normal;color:var(--red)}
+.hl{color:var(--red);font-weight:700}
+
+.card{background:var(--box);padding:26px 32px}
+.card h3{font:700 32px/1.2 var(--sans);color:var(--text);margin-bottom:12px}
+.card p{font:400 36px/1.38 var(--sans)}
+.card p.s{font-size:32px;color:var(--muted)}
+.big .card p{font-size:38px}
+
+.new{font:700 28px/1 var(--sans);color:var(--red);white-space:nowrap}
+
+.newbox{display:flex;align-items:center;gap:24px;padding:24px 32px;background:var(--box)}
+.newbox p{font:500 34px/1.38 var(--sans)}
+
+.quote{font:400 40px/1.4 var(--sans);padding:24px 32px;background:var(--box)}
+.quote small{display:block;margin-top:12px;font:700 26px/1 var(--sans);color:var(--dim)}
+
+.ph{position:absolute;overflow:hidden}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1)}
+.ph .cap{position:absolute;left:0;bottom:0;max-width:100%;white-space:nowrap;padding:8px 16px;font:500 24px/1.3 var(--sans);color:var(--text);background:var(--bg)}
+.ph .cap b{font-weight:700}
+.credit{position:absolute;right:0;top:0;padding:6px 10px;font:400 12px/1 var(--sans);color:var(--text);background:var(--bg)}
+
+.foot{position:absolute;left:80px;right:80px;bottom:30px;display:flex;justify-content:space-between;font:500 22px/1 var(--sans);color:var(--dim)}
+
+#bar{display:none}
+#hud{position:fixed;right:18px;bottom:16px;display:flex;gap:6px;align-items:center;z-index:5;opacity:0}
+body:hover #hud{opacity:.9}
+#hud button{all:unset;cursor:pointer;color:#fff;background:rgba(0,0,0,.6);font:700 14px/1 var(--sans);padding:10px 14px}
+#hud span{color:#fff;font:700 14px/1 var(--sans);padding:0 8px}
+
+/* ô nhiều màu (chữ vẫn đen) */
+.card,.newbox,.quote,[style*="background:var(--box)"]{--box:#cbb98a}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n+1){background:#cbb98a!important}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n+2){background:#b7c9a0!important}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n+3){background:#e0b9a2!important}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n+4){background:#a9c3d3!important}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n+5){background:#d8c070!important}
+:is(.card,.newbox,.quote,[style*="background:var(--box)"]):nth-child(6n){background:#c6b4cf!important}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ============ 1 - BÌA ============ -->
+<section class="slide" data-title="Bìa" style="background:#8f1d1b;color:#fff">
+  <div class="ph old" style="right:0;top:0;bottom:0;width:640px">
+    <img src="assets/hcm-1950s.jpg" alt="Chủ tịch Hồ Chí Minh những năm 1950" style="object-position:50% 20%">
+  </div>
+  <div style="position:absolute;left:80px;top:60px;bottom:50px;right:700px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+    <h1 style="font:800 76px/1.1 var(--sans);text-transform:uppercase;color:#fff">Phân tích những điểm sáng tạo trong Tư tưởng Hồ Chí Minh</h1>
+    <p style="font:800 46px/1.15 var(--sans);text-transform:uppercase;color:#ffeb00">Về nội dung xây dựng chủ nghĩa xã hội trong thời kỳ quá độ ở Việt Nam</p>
+    <p style="font:400 32px/1.5 var(--sans);color:#fff;margin-top:6px">Môn: Tư tưởng Hồ Chí Minh<br>GVHD: Ths. Nguyễn Thị Ngọc Dung</p>
+    <p style="font:400 36px/1.3 var(--sans);color:#fff;margin-top:10px">Nhóm 7:<br>38. Nguyễn Hồng Phúc<br>39. Nguyễn Anh Quân<br>40. Nguyễn Hữu Quân<br>41. Trần Văn Hồng Quân<br>42. Nguyễn Lương Quang<br>43. Nguyễn Văn Quang<br>44. Vũ Văn Quảng</p>
+  </div>
+</section>
+
+<!-- ============ 2 - NỘI DUNG ============ -->
+<section class="slide" data-title="Nội dung trình bày">
+  <div class="pad">
+    <div class="kick">Nội dung trình bày</div>
+    <h2 >Bố cục <em>3 phần</em></h2>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:10px">
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:transparent">
+        <div class="ph old" style="position:relative;height:440px"><img src="assets/hcm-dai-doan-308.jpg" alt="Bác Hồ nói chuyện với bộ đội tại Đền Hùng, 1954"></div>
+        <div style="padding:28px 30px">
+          <div style="font:800 70px/1 var(--sans);color:var(--red)">01</div>
+          <p style="font:800 39px/1.25 var(--sans);margin-top:12px">Tính chất, đặc điểm và nhiệm vụ của thời kỳ quá độ</p>
+        </div>
+      </div>
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:transparent">
+        <div class="ph" style="position:relative;height:440px"><img src="assets/gang-thep-thai-nguyen.jpg" alt="Khu Gang thép Thái Nguyên"></div>
+        <div style="padding:28px 30px">
+          <div style="font:800 70px/1 var(--sans);color:var(--red)">02</div>
+          <p style="font:800 39px/1.25 var(--sans);margin-top:12px">Nội dung xây dựng CNXH ở nước ta</p>
+          <p style="font:600 30px/1.5 var(--sans);color:var(--muted);margin-top:10px">a. Kinh tế ,  b. Chính trị<br>c. Tư tưởng, văn hoá, xã hội</p>
+        </div>
+      </div>
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:transparent">
+        <div class="ph old" style="position:relative;height:440px"><img src="assets/hcm-tuoi-cay.jpg" alt="Bác Hồ tưới cây" style="object-position:50% 30%"></div>
+        <div style="padding:28px 30px">
+          <div style="font:800 70px/1 var(--sans);color:var(--red)">03</div>
+          <p style="font:800 39px/1.25 var(--sans);margin-top:12px">Những điểm sáng tạo và kết luận</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 - TÍNH CHẤT ============ -->
+<section class="slide" data-title="Tính chất thời kỳ quá độ">
+  <div class="ph old" style="left:0;top:0;bottom:0;width:540px">
+    <img src="assets/hcm-dai-doan-308.jpg" alt="Bác Hồ nói chuyện với Đại đoàn Quân Tiên Phong tại Đền Hùng, 9/1954"><div class="cap">Bác Hồ với bộ đội tại Đền Hùng, 9/1954</div>
+    
+  </div>
+  <div class="pad" style="left:600px;padding-left:40px">
+    <div class="kick"><span class="no">01</span>Tính chất thời kỳ quá độ</div>
+    <div class="quote">Công cuộc biến đổi <b class="hl">khó khăn nhất, sâu sắc nhất</b> - "thậm chí nó còn gian nan, phức tạp hơn cả việc đánh giặc"<small>Hồ Chí Minh</small></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:6px">
+      <div class="card"><h3>1. Đảo lộn mọi mặt</h3><p>Lực lượng sản xuất, quan hệ sản xuất, kiến trúc thượng tầng</p><p class="s" style="margin-top:10px">=> "một cuộc chiến đấu khổng lồ"</p></div>
+      <div class="card"><h3>2. Công việc mới mẻ</h3><p>Vừa làm, vừa học, vừa rút kinh nghiệm</p><p class="s" style="margin-top:10px">=> chưa có nhiều kinh nghiệm, nhất là về kinh tế</p></div>
+      <div class="card"><h3>3. Bị chống phá</h3><p>Thế lực phản động trong và ngoài nước tìm cách chống phá</p></div>
+    </div>
+    <div class="newbox"><span class="new">Lời dặn</span><p>Phải <span class="hl">thận trọng</span>, tránh nôn nóng, chủ quan, <span class="hl">đốt cháy giai đoạn</span>; xác định đúng <span class="hl">bước đi và hình thức</span> phù hợp trình độ lực lượng sản xuất</p></div>
+  </div>
+</section>
+
+<!-- ============ 4 - ĐẶC ĐIỂM, NHIỆM VỤ ============ -->
+<section class="slide" data-title="Đặc điểm và nhiệm vụ">
+  <div class="pad">
+    <div class="kick"><span class="no">01</span>Đặc điểm và nhiệm vụ</div>
+    <p  style="font:700 37px/1.3 var(--sans);color:var(--muted)">Đặc điểm to nhất của nước ta trong thời kỳ quá độ:</p>
+    <!-- sơ đồ bước nhảy -->
+    <div  style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:26px">
+      <div style="padding:26px 34px;border-radius:18px;background:var(--box);font:800 44px/1.2 var(--sans)">Nước nông nghiệp<br>lạc hậu</div>
+      <div style="position:relative;height:110px">
+        <svg viewBox="0 0 600 110" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+          <path d="M10 90 Q300 -40 585 90" fill="none" stroke="var(--red)" stroke-width="7" stroke-linecap="round"/>
+          <path d="M560 70 L588 92 L556 100" fill="none" stroke="var(--red)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font:800 29px/1 var(--sans);color:var(--muted)">không kinh qua giai đoạn phát triển TBCN</div>
+      </div>
+      <div style="padding:26px 34px;border-radius:18px;background:var(--box);color:var(--red);font:800 44px/1.2 var(--sans)">Chủ nghĩa<br>xã hội</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:26px;margin-top:4px">
+      <div class="card"><h3>Nhiệm vụ</h3>
+        <p>- <span class="hl">Quan trọng nhất:</span> xây dựng nền tảng vật chất - kỹ thuật của CNXH</p>
+        <p>- Xây dựng tiền đề kinh tế, chính trị, văn hoá, tư tưởng</p>
+        <p>- Cải tạo xã hội cũ, xây dựng xã hội mới - <i>"xây dựng là nhiệm vụ chủ chốt và lâu dài"</i></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div class="newbox" style="flex-direction:column;align-items:flex-start;gap:14px"><span class="new">Điểm sáng tạo</span><p>Tiến <span class="hl">thẳng</span> lên CNXH, nhưng đi <span class="hl">tuần tự từng bước, từ thấp đến cao</span>, qua các khâu trung gian, quá độ</p></div>
+        <div class="card"><h3>Trước hết &amp; quan trọng nhất</h3><p>Sự lãnh đạo của <b>Đảng Cộng sản</b> + khối <b>đại đoàn kết toàn dân tộc</b></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 - KINH TẾ (1) ============ -->
+<section class="slide" data-title="Kinh tế - ngành và cơ cấu">
+  <div class="pad">
+    <div class="kick"><span class="no">2a</span>Lĩnh vực kinh tế</div>
+    <h2  style="font-size:58px">Tăng năng suất lao động trên cơ sở <em>công nghiệp hoá XHCN</em></h2>
+    <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:34px;flex:1">
+      <!-- hai chân -->
+      <div  style="position:relative;border-radius:12px;overflow:hidden;background:transparent">
+        <div style="display:grid;grid-template-columns:1fr 1fr;height:100%">
+          <div class="ph" style="position:relative"><img src="assets/gang-thep-thai-nguyen.jpg" alt="Gang thép Thái Nguyên"><div class="cap">Gang thép Thái Nguyên</div></div>
+          <div class="ph" style="position:relative"><img src="assets/nong-dan-hoi-an.jpg" alt="Người nông dân trên đồng lúa" style="object-position:50% 35%"><div class="cap">Nông dân trên đồng lúa</div></div>
+        </div>
+        <div style="position:absolute;left:50%;top:28px;transform:translateX(-50%);padding:16px 30px;border-radius:999px;background:var(--box);color:var(--red);font:700 34px/1 var(--sans);white-space:nowrap;border-radius:8px">"Hai chân" của nền kinh tế nước nhà</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="card"><h3>Nông nghiệp</h3><p>là <span class="hl">mặt trận hàng đầu</span></p></div>
+        <div class="card"><h3>Thương nghiệp</h3><p>là <span class="hl">cầu nối tốt nhất</span> giữa các ngành sản xuất xã hội</p></div>
+        <div class="card"><h3>Xây dựng 3 cơ cấu</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+            <span style="font:700 32px/1.2 var(--sans)">1. Cơ cấu kinh tế ngành</span>
+            <span style="font:700 32px/1.2 var(--sans)">2. Cơ cấu các thành phần kinh tế</span>
+            <span style="font:700 32px/1.2 var(--sans)">3. Cơ cấu vùng kinh tế và lãnh thổ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p  style="font:500 33px/1.4 var(--sans);color:var(--muted)">"Kẻ thù muốn đè bẹp ta về kinh tế thay bằng quân sự, vì vậy ta phải phát triển kinh tế."</p>
+  </div>
+</section>
+
+<!-- ============ 6 - KINH TẾ (2) NHIỀU THÀNH PHẦN ============ -->
+<section class="slide" data-title="Kinh tế nhiều thành phần">
+  <div class="pad" style="gap:22px">
+    <div class="kick"><span class="no">2a</span>Lĩnh vực kinh tế - Cơ cấu nhiều thành phần</div>
+    <div class="newbox"><span class="new">Điểm sáng tạo</span><p>Hồ Chí Minh là <span class="hl">người đầu tiên</span> ở nước ta chủ trương phát triển <span class="hl">kinh tế nhiều thành phần</span> trong suốt thời kỳ quá độ, xác định rõ vị trí và xu hướng của từng thành phần</p></div>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--box)">
+        <div class="ph old" style="position:relative;height:220px"><img src="assets/hcm-nha-may-1959.jpg" alt="Bác Hồ thăm nhà máy năm 1959" style="object-position:50% 25%"><div class="cap">Bác Hồ thăm nhà máy, 1959</div></div>
+        <div style="padding:20px 24px">
+          <div style="font:800 27px/1.2 var(--sans);letter-spacing:.08em;color:var(--dim)">ƯU TIÊN PHÁT TRIỂN</div>
+          <div style="font:800 41px/1.15 var(--sans);margin:8px 0 12px">Kinh tế quốc doanh</div>
+          <p style="font:500 32px/1.42 var(--sans);color:var(--muted)">Tạo nền tảng vật chất cho CNXH, thúc đẩy cải tạo xã hội chủ nghĩa</p>
+        </div>
+      </div>
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--box)">
+        <div class="ph" style="position:relative;height:220px"><img src="assets/gat-lua.jpg" alt="Nông dân gặt lúa"><div class="cap">Nông dân gặt lúa</div></div>
+        <div style="padding:20px 24px">
+          <div style="font:800 27px/1.2 var(--sans);letter-spacing:.08em;color:var(--dim)">ĐẶC BIỆT KHUYẾN KHÍCH</div>
+          <div style="font:800 41px/1.15 var(--sans);margin:8px 0 12px">Hợp tác xã</div>
+          <p style="font:500 32px/1.42 var(--sans);color:var(--muted)">Sở hữu tập thể của nhân dân lao động. Nguyên tắc: <b style="color:var(--text)">dần dần, từ thấp đến cao, tự nguyện, cùng có lợi</b> - chống chủ quan, gò ép, hình thức</p>
+        </div>
+      </div>
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--box)">
+        <div class="ph" style="position:relative;height:220px"><img src="assets/bat-trang.jpg" alt="Nghệ nhân làm gốm Bát Tràng"><div class="cap">Làm gốm thủ công Bát Tràng</div></div>
+        <div style="padding:20px 24px">
+          <div style="font:800 27px/1.2 var(--sans);letter-spacing:.08em;color:var(--dim)">BẢO HỘ SỞ HỮU</div>
+          <div style="font:800 41px/1.15 var(--sans);margin:8px 0 12px">Thợ thủ công, lao động riêng lẻ</div>
+          <p style="font:500 32px/1.42 var(--sans);color:var(--muted)">Hướng dẫn, giúp cải tiến cách làm ăn; khuyến khích đi vào con đường hợp tác</p>
+        </div>
+      </div>
+      <div  style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--box)">
+        <div class="ph" style="position:relative;height:220px"><img src="assets/cho-dong-xuan.jpg" alt="Chợ Đồng Xuân"><div class="cap">Buôn bán ở chợ Đồng Xuân</div></div>
+        <div style="padding:20px 24px">
+          <div style="font:800 27px/1.2 var(--sans);letter-spacing:.08em;color:var(--dim)">KHÔNG XOÁ BỎ SỞ HỮU</div>
+          <div style="font:800 41px/1.15 var(--sans);margin:8px 0 12px">Tư sản công thương</div>
+          <p style="font:500 32px/1.42 var(--sans);color:var(--muted)">Hướng dẫn làm lợi cho quốc kế dân sinh; cải tạo theo CNXH bằng <b style="color:var(--text)">hình thức tư bản nhà nước</b></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7 - KINH TẾ (3) PHÂN PHỐI, QUẢN LÝ ============ -->
+<section class="slide" data-title="Phân phối và quản lý">
+  <div class="ph old" style="right:0;top:0;bottom:0;width:560px">
+    <img src="assets/hcm-nha-may-1959.jpg" alt="Chủ tịch Hồ Chí Minh thăm nhà máy lọc dầu Lan Châu, 1959" style="object-position:50% 30%"><div class="cap">Bác Hồ thăm nhà máy, 1959</div>
+    
+  </div>
+  <div class="pad" style="right:520px">
+    <div class="kick"><span class="no">2a</span>Lĩnh vực kinh tế - Phân phối và quản lý</div>
+    <p  style="font:700 37px/1.3 var(--sans);color:var(--muted)">Nguyên tắc <span class="hl">phân phối theo lao động</span>:</p>
+    <div  style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div style="padding:26px 20px;border-radius:18px;background:var(--box);text-align:center;font:800 44px/1.2 var(--sans)">Làm nhiều<br>hưởng nhiều</div>
+      <div style="padding:26px 20px;border-radius:18px;background:var(--box);text-align:center;font:800 44px/1.2 var(--sans)">Làm ít<br>hưởng ít</div>
+      <div style="padding:26px 20px;border-radius:18px;background:var(--box);text-align:center;font:800 44px/1.2 var(--sans)">Không làm<br>không hưởng</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+      <div class="card" style="display:flex;flex-direction:column;gap:12px"><span class="new" style="align-self:flex-start">Điểm sáng tạo</span><h3 style="margin:4px 0 0">Chế độ khoán</h3>
+        <p>Là <span class="hl">một điều kiện của CNXH</span>, khuyến khích công nhân luôn tiến bộ, nhà máy tiến bộ</p>
+        <p style="font:600 37px/1.35 var(--sans);color:var(--text)">"Làm khoán là ích chung và lợi riêng"</p>
+      </div>
+      <div class="card"><h3>Quản lý kinh tế</h3>
+        <p>- Dựa trên <b>hạch toán</b>, hiệu quả cao; dùng tốt các <b>đòn bẩy</b></p>
+        <p>- <b>Đa dạng hoá</b> sở hữu; Nhà nước bảo hộ quyền sở hữu tư liệu sản xuất</p>
+        <p>- Sử dụng <span class="hl">hình thức và phương tiện của CNTB</span> để xây dựng CNXH</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 - CHÍNH TRỊ ============ -->
+<section class="slide" data-title="Lĩnh vực chính trị">
+  <div class="ph old" style="left:0;top:0;bottom:0;width:580px">
+    <img src="assets/ba-dinh-1945.jpg" alt="Quảng trường Ba Đình ngày 2/9/1945" style="object-position:50% 40%"><div class="cap">Quảng trường Ba Đình, 2/9/1945</div>
+    
+  </div>
+  <div class="pad" style="left:640px;padding-left:40px">
+    <div class="kick"><span class="no">2b</span>Lĩnh vực chính trị</div>
+    <p  style="font:700 37px/1.3 var(--sans);color:var(--muted)">Nội dung <span class="hl">quan trọng nhất</span>:</p>
+    <h2  style="font-size:69px">Giữ vững và phát huy <em>vai trò lãnh đạo của Đảng Cộng sản</em></h2>
+    <!-- sơ đồ -->
+    <div  style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px">
+      <div class="card"><h3>Mặt trận dân tộc thống nhất</h3><p>Củng cố và <b>mở rộng</b></p>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <span style="padding:10px 16px;background:var(--bg);font:700 29px/1 var(--sans)">Công nhân</span>
+          <span style="padding:10px 16px;background:var(--bg);font:700 29px/1 var(--sans)">Nông dân</span>
+          <span style="padding:10px 16px;background:var(--bg);font:700 29px/1 var(--sans)">Trí thức</span>
+        </div>
+        <p class="s" style="margin-top:12px">=> nòng cốt là liên minh công - nông - trí thức, do Đảng lãnh đạo</p>
+      </div>
+      <div class="card"><h3>Hệ thống chính trị</h3><p>Củng cố, tăng cường sức mạnh của <b>toàn bộ hệ thống</b> và các thành tố của nó</p></div>
+    </div>
+    <div class="quote" style="font-size:36px">Chế độ ta là chế độ dân chủ. Tức là nhân dân làm chủ.<small>Hồ Chí Minh</small></div>
+  </div>
+</section>
+
+<!-- ============ 9 - TƯ TƯỞNG, VĂN HOÁ, XÃ HỘI ============ -->
+<section class="slide" data-title="Tư tưởng, văn hoá, xã hội">
+  <div class="pad" style="gap:22px">
+    <div class="kick"><span class="no">2c</span>Lĩnh vực tư tưởng, văn hoá, xã hội</div>
+    <div style="display:grid;grid-template-columns:1fr 600px;gap:34px;flex:1">
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:26px">
+        <h2  style="font-size:67px">Muốn cải tạo xã hội chủ nghĩa thì <em>phải cải tạo chính mình</em></h2>
+        <div class="newbox"><p style="font:600 39px/1.4 var(--sans)">"Nếu không có tư tưởng xã hội chủ nghĩa thì <span class="hl">không làm việc xã hội chủ nghĩa được</span>"</p></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><h3>Phải khắc phục</h3>
+            <p>Kiến thức yếu kém - Chính trị bấp bênh - Kinh tế trì trệ - Văn hoá lạc hậu</p>
+            <p class="s" style="margin-top:8px">=> dẫn tới thoái hoá cán bộ, đảng viên - "khe hở" để CNTB lợi dụng</p>
+          </div>
+          <div class="card"><h3>Trước hết phải có học thức</h3>
+            <p>Học văn hoá, chính trị, kỹ thuật</p>
+            <p class="s" style="margin-top:8px">Nâng cao dân trí - Đào tạo và sử dụng nhân tài - Khẳng định vai trò to lớn của văn hoá</p>
+          </div>
+        </div>
+      </div>
+      <div  style="display:grid;grid-template-rows:1fr 1fr;gap:18px">
+        <div class="ph old" style="position:relative;border-radius:18px"><img src="assets/hcm-thieu-nhi-2.jpg" alt="Bác Hồ với thiếu nhi, thập niên 1950"><div class="cap">Bác Hồ với thiếu nhi</div></div>
+        <div class="ph old" style="position:relative;border-radius:18px"><img src="assets/hoc-sinh-ha-noi-1952.jpg" alt="Học sinh Hà Nội năm 1952"><div class="cap">Học sinh Hà Nội, 1952</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 - ĐIỂM SÁNG TẠO ============ -->
+<section class="slide big" data-title="Những điểm sáng tạo">
+  <div class="pad" style="gap:22px">
+    <div class="kick"><span class="no">03</span>Những điểm sáng tạo</div>
+    <h2  style="font-size:60px">Vận dụng <em>sáng tạo</em> chủ nghĩa Mác - Lênin vào điều kiện cụ thể Việt Nam</h2>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:20px">
+      <div class="card"><h3>1. Bước đi</h3><p>Từ nước nông nghiệp lạc hậu <b>tiến thẳng</b> lên CNXH, không qua TBCN - nhưng <span class="hl">tuần tự, từ thấp đến cao</span></p></div>
+      <div class="card"><h3>2. Kinh tế nhiều thành phần</h3><p><span class="hl">Người đầu tiên</span> chủ trương, trong suốt thời kỳ quá độ; mỗi thành phần một chính sách riêng</p></div>
+      <div class="card"><h3>3. Ngành kinh tế</h3><p><b>Nông nghiệp</b> là mặt trận hàng đầu; công nghiệp - nông nghiệp là <span class="hl">"hai chân"</span></p></div>
+      <div class="card"><h3>4. Phương tiện, động lực</h3><p>Dùng <b>hình thức, phương tiện của CNTB</b>; tư bản nhà nước; <span class="hl">khoán</span> - "ích chung và lợi riêng"</p></div>
+      <div class="card"><h3>5. Chính trị</h3><p>Đảng lãnh đạo + mặt trận <b>rộng rãi</b>, nòng cốt <span class="hl">công - nông - trí thức</span></p></div>
+      <div class="card"><h3>6. Con người</h3><p><span class="hl">Cải tạo chính mình</span>, có tư tưởng XHCN, học thức; nâng cao dân trí, trọng nhân tài</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11 - KẾT LUẬN ============ -->
+<section class="slide" data-title="Kết luận">
+  <div class="pad" style="justify-content:space-between">
+    <div class="kick">Kết luận</div>
+    <p  style="font:600 44px/1.45 var(--sans);max-width:1500px">Xây dựng CNXH đòi hỏi <span class="hl">năng lực lãnh đạo, nguyên tắc khoa học</span>, hiểu quy luật khách quan và <span class="hl">nghệ thuật khôn khéo</span>, sát với thực tế.</p>
+    <div  style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1600px">
+      <div class="card"><h3>Kinh tế</h3><p>Nhiều thành phần - công nghiệp hoá - phân phối theo lao động</p></div>
+      <div class="card"><h3>Chính trị</h3><p>Giữ vững vai trò lãnh đạo của Đảng</p></div>
+      <div class="card"><h3>Tư tưởng - văn hoá</h3><p>Cải tạo chính mình - nâng cao dân trí</p></div>
+    </div>
+    <p  style="font:700 37px/1.4 var(--sans);color:var(--muted)">Sức mạnh quyết định: <b style="color:var(--text)">sự lãnh đạo của Đảng</b> + <b style="color:var(--text)">khối đại đoàn kết toàn dân tộc</b></p>
+    <div  style="display:flex;align-items:center;gap:40px;margin-top:20px">
+      <div style="font:800 130px/1 var(--sans);color:var(--red)">Xin cảm ơn!</div>
+      <img src="assets/hcm-signature.svg" alt="Bút tích Hồ Chí Minh" style="height:90px;">
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12 - PHỤ LỤC VẤN ĐÁP ============ -->
+<section class="slide" data-title="Phụ lục - ôn vấn đáp">
+  <div class="pad" style="gap:18px;padding-top:40px">
+    <div class="kick">Phụ lục - Ôn tập vấn đáp</div>
+    <div  style="display:grid;grid-template-columns:1fr 1fr;gap:14px 26px;flex:1;font:500 29px/1.32 var(--sans)">
+      <div class="card" style="padding:16px 22px"><b class="hl">1. Nguyên tắc tổ chức HTX?</b><br>Dần dần, từ thấp đến cao, tự nguyện, cùng có lợi; chống chủ quan, gò ép, hình thức.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">2. "Hai chân" của nền kinh tế?</b><br>Công nghiệp và nông nghiệp.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">3. Ưu tiên phát triển thành phần nào?</b><br>Kinh tế quốc doanh - tạo nền tảng vật chất cho CNXH.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">4. Chính trị - quan trọng nhất?</b><br>Giữ vững và phát huy vai trò lãnh đạo của Đảng Cộng sản.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">5. Với tư sản công thương?</b><br>Không xoá bỏ sở hữu; hướng dẫn làm lợi cho quốc kế dân sinh; cải tạo bằng hình thức tư bản nhà nước.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">6. Với thợ thủ công, lao động riêng lẻ?</b><br>Bảo hộ quyền sở hữu TLSX; giúp cải tiến cách làm ăn; khuyến khích đi vào hợp tác.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">7. Phân phối theo lao động?</b><br>Làm nhiều hưởng nhiều, làm ít hưởng ít, không làm không hưởng.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">8. Những cơ cấu cần xây dựng?</b><br>Cơ cấu ngành; cơ cấu thành phần kinh tế; cơ cấu vùng kinh tế và lãnh thổ.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">9. "Nếu không có tư tưởng XHCN..."</b><br>...thì không làm việc xã hội chủ nghĩa được.</div>
+      <div class="card" style="padding:16px 22px"><b class="hl">10. Quan niệm về kinh tế HTX?</b><br>Hình thức sở hữu tập thể của nhân dân lao động; Nhà nước đặc biệt khuyến khích, hướng dẫn, giúp đỡ.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="bar"></div>
+<div id="hud"><button id="prev" aria-label="Trang trước"><</button><span id="count"></span><button id="next" aria-label="Trang sau">></button><button id="fs" aria-label="Toàn màn hình">Full</button></div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar'), count = document.getElementById('count');
+  let i = 0;
+
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  function go(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    count.textContent = `${i + 1} / ${slides.length}`;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+  addEventListener('resize', fit);
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(i + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') toggleFs();
+  });
+  function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+  document.getElementById('prev').onclick = e => { e.stopPropagation(); go(i - 1); };
+  document.getElementById('next').onclick = e => { e.stopPropagation(); go(i + 1); };
+  document.getElementById('fs').onclick = e => { e.stopPropagation(); toggleFs(); };
+  stage.addEventListener('click', e => go(e.clientX < innerWidth * 0.25 ? i - 1 : i + 1));
+  fit();
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>

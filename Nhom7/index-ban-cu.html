@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nhóm 7 · Xây dựng CNXH trong thời kỳ quá độ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --wine:#3e0b14; --maroon:#6e1423; --crimson:#9b1c2c; --red-seal:#b3261e;
+  --brass:#a87a22; --ochre:#c99a3d; --gold:#e3c06f;
+  --teal:#1f5f66; --navy:#1d3557; --olive:#5b6b25; --peace:#2c6a9e;
+  --ivory:#f7efdc; --ivory-2:#efe2c4; --plane:#e4d6b5;
+  --ink:#2a1c14; --ink-2:#5b4636;
+  --serif:"Noto Serif", Georgia, serif;
+  --display:"Playfair Display", "Noto Serif", Georgia, serif;
+  --sans:"Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:radial-gradient(ellipse at 50% 40%, #4a1019 0%, #240609 70%);color:var(--ink);font-family:var(--sans);user-select:none}
+#viewport{position:fixed;inset:0;overflow:hidden;cursor:default}
+#viewport.dragging{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#world.moving{will-change:transform}
+
+/* ---------- mặt phẳng canvas vô hạn ---------- */
+#plane{position:absolute;background-color:var(--plane);
+  background-image:radial-gradient(rgba(110,20,35,.16) 1.6px, transparent 1.8px),
+    linear-gradient(rgba(168,122,34,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,122,34,.07) 1px, transparent 1px);
+  background-size:48px 48px, 240px 240px, 240px 240px;border-radius:120px;
+  box-shadow:0 0 0 30px rgba(168,122,34,.18), 0 0 240px rgba(0,0,0,.6)}
+#route{position:absolute;overflow:visible;pointer-events:none}
+.mark{position:absolute;pointer-events:none}
+
+/* ---------- slide ---------- */
+.slide{position:absolute;width:1920px;height:1080px;background:var(--ivory);border-radius:22px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(40,10,10,.35), 0 0 0 1px rgba(168,122,34,.35);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .15 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 30% 0%, #fbf5e6 0%, var(--ivory) 45%, var(--ivory-2) 100%);
+  cursor:pointer}
+.slide.current{cursor:default}
+.slide .frame{position:absolute;inset:18px;border:1.5px solid rgba(168,122,34,.45);border-radius:14px;pointer-events:none}
+.slide .frame::after{content:"";position:absolute;inset:6px;border:1px solid rgba(168,122,34,.25);border-radius:10px}
+.inner{position:absolute;inset:0;padding:64px 88px 84px;display:flex;flex-direction:column;gap:22px}
+.wm{position:absolute;pointer-events:none;opacity:.09;color:var(--maroon)}
+
+.kicker{display:flex;align-items:center;gap:16px;font:700 19px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
+.kicker .num{display:inline-grid;place-items:center;min-width:46px;height:46px;padding:0 10px;border-radius:50%;background:var(--maroon);color:var(--gold);font:800 20px/1 var(--display);letter-spacing:0}
+.ref{margin-left:auto;font:600 16px/1 var(--sans);letter-spacing:.06em;text-transform:none;color:var(--ink-2);padding:9px 16px;border:1px dashed rgba(91,70,54,.5);border-radius:40px;background:rgba(255,255,255,.35)}
+h2.t{font:800 58px/1.12 var(--display);color:var(--maroon);letter-spacing:-.005em}
+h2.t em{font-style:italic;color:var(--crimson)}
+.rule{height:4px;width:140px;background:linear-gradient(90deg,var(--crimson),var(--ochre));border-radius:4px}
+.lead{font:400 27px/1.5 var(--serif);color:var(--ink)}
+.lead b{color:var(--crimson)}
+
+.grid{display:grid;gap:20px}
+.card{position:relative;border-radius:16px;padding:24px 28px 24px;background:rgba(255,255,255,.55);border:1.5px solid rgba(0,0,0,.06);border-top:7px solid var(--c,var(--brass));box-shadow:0 6px 18px rgba(60,30,10,.07)}
+.card.tint{background:color-mix(in srgb, var(--c) 9%, #fffaf0)}
+.card h4{font:800 19px/1.25 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--c,var(--brass));margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.card h4 .ic{width:30px;height:30px;flex:none}
+.card p{font:400 23.5px/1.48 var(--sans);color:var(--ink)}
+.card p + p{margin-top:8px}
+.card .q{font-family:var(--serif);font-style:italic}
+.c-crimson{--c:var(--crimson)} .c-brass{--c:var(--brass)} .c-teal{--c:var(--teal)} .c-navy{--c:var(--navy)}
+.c-olive{--c:var(--olive)} .c-peace{--c:var(--peace)} .c-maroon{--c:var(--maroon)}
+
+.quote{position:relative;padding:26px 34px 26px 96px;border-radius:16px;background:linear-gradient(100deg, rgba(110,20,35,.08), rgba(201,154,61,.10));border-left:6px solid var(--crimson);font:italic 400 27px/1.5 var(--serif);color:var(--wine)}
+.quote::before{content:"“";position:absolute;left:24px;top:-6px;font:900 110px/1 var(--display);color:var(--ochre);opacity:.85}
+.quote .src{display:block;margin-top:8px;font:600 17px/1 var(--sans);font-style:normal;letter-spacing:.08em;color:var(--brass);text-transform:uppercase}
+.seal{display:inline-block;transform:rotate(-6deg);border:3px solid var(--red-seal);color:var(--red-seal);font:800 15px/1 var(--sans);letter-spacing:.18em;padding:8px 12px;border-radius:6px;opacity:.85;text-transform:uppercase;box-shadow:inset 0 0 0 2px rgba(179,38,30,.25)}
+.hl{background:linear-gradient(transparent 58%, rgba(227,192,111,.6) 58%);padding:0 2px}
+.foot{position:absolute;left:88px;right:88px;bottom:34px;display:flex;justify-content:space-between;align-items:center;font:600 15px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(91,70,54,.75)}
+.foot .pg{font:800 18px/1 var(--display);letter-spacing:0;color:var(--maroon)}
+
+/* poster layout */
+.split{position:absolute;inset:0;display:grid;grid-template-columns:var(--pw,34%) 1fr}
+.poster{position:relative;margin:30px 0 30px 30px;border-radius:18px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,#000 93%,transparent 100%);mask-image:linear-gradient(90deg,#000 93%,transparent 100%)}
+.poster svg{width:100%;height:100%;display:block}
+.split .inner{position:relative;inset:auto;padding:64px 88px 84px 44px}
+.split ~ .foot{left:calc(var(--pw,34%) + 44px)}
+.roomy .inner{gap:30px}
+.roomy .card{padding:28px 32px}
+.roomy .card p{font-size:27px;line-height:1.5}
+.roomy .card h4{font-size:21px}
+.roomy .quote{font-size:31px!important}
+.roomy .lead{font-size:30px}
+.roomy .quote.sm{font-size:26px!important}
+.s5 .card p{font-size:25.5px;line-height:1.5}
+.mid .card{display:flex;flex-direction:column;justify-content:center}
+.pcol{position:relative;flex:1;border-radius:16px;overflow:hidden;border:3px solid var(--gold)}
+.pcol svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* stamps */
+.stamp{position:absolute;padding:0;filter:drop-shadow(0 10px 14px rgba(40,10,0,.35));pointer-events:none}
+.stamp img{display:block;width:100%;height:auto}
+.stamp figcaption{margin-top:8px;font:600 13px/1.3 var(--sans);letter-spacing:.06em;color:var(--ink-2);text-align:center;background:rgba(247,239,220,.85);padding:4px 6px;border-radius:4px}
+.postmark{position:absolute;width:120px;height:120px;border:3px solid rgba(40,40,60,.45);border-radius:50%;pointer-events:none}
+
+/* dark slides */
+.slide.dark{background:radial-gradient(ellipse at 70% 30%, #8a1a2c 0%, var(--maroon) 40%, var(--wine) 100%);color:var(--ivory)}
+.slide.dark .frame{border-color:rgba(227,192,111,.55)}
+.slide.dark .wm{color:var(--gold);opacity:.11}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:8px;border-radius:999px;background:rgba(36,6,9,.82);backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(0,0,0,.4);border:1px solid rgba(227,192,111,.35);z-index:10;transition:opacity .4s}
+#hud button{all:unset;cursor:pointer;color:var(--gold);font:700 14px/1 var(--sans);letter-spacing:.06em;padding:10px 14px;border-radius:999px}
+#hud button:hover{background:rgba(227,192,111,.15)}
+#hud button:focus-visible{outline:2px solid var(--gold)}
+#counter{color:var(--ivory);font:800 15px/1 var(--display);min-width:70px;text-align:center}
+#progress{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,var(--crimson),var(--gold));z-index:10;transition:width .6s}
+#hint{position:fixed;right:18px;top:16px;color:rgba(247,239,220,.6);font:500 12px/1.5 var(--sans);letter-spacing:.04em;z-index:10;text-align:right}
+body.idle #hud,body.idle #hint{opacity:0}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="viewport"><div id="world"><div id="plane"></div><svg id="route"></svg>
+
+<!-- ===================== SLIDE 1 · TIÊU ĐỀ ===================== -->
+<section class="slide dark" data-pos="0,0,0,1" data-title="Tiêu đề">
+  <div class="frame"></div>
+  <svg class="wm" style="right:-260px;top:-300px;width:1300px;height:1300px" viewBox="-100 -100 200 200"><use href="#sym-sunstar" x="-100" y="-100" width="200" height="200"/></svg>
+  <div style="position:absolute;left:120px;top:150px;width:560px;height:760px">
+    <div class="rv" style="position:absolute;inset:0;border-radius:280px 280px 24px 24px;border:3px solid var(--gold);padding:18px">
+      <div style="width:100%;height:100%;border-radius:262px 262px 14px 14px;overflow:hidden;background:#d9c7a0">
+        <img src="assets/hcm-1946.jpg" alt="Chân dung Chủ tịch Hồ Chí Minh năm 1946" style="width:100%;height:100%;object-fit:cover;filter:sepia(.55) contrast(1.05) brightness(.98)">
+      </div>
+    </div>
+    <img class="rv" src="assets/hcm-signature.svg" alt="Bút tích Hồ Chí Minh" style="position:absolute;left:40px;bottom:-70px;width:420px;filter:invert(83%) sepia(38%) saturate(570%) hue-rotate(345deg) brightness(95%)">
+  </div>
+  <div style="position:absolute;left:790px;right:120px;top:150px;display:flex;flex-direction:column;gap:30px">
+    <div class="rv" style="display:flex;gap:14px;align-items:center;font:700 20px/1 var(--sans);letter-spacing:.26em;color:var(--gold)">
+      <svg width="34" height="34" viewBox="-50 -50 100 100"><use href="#sym-star" x="-50" y="-50" width="100" height="100" fill="var(--gold)"/></svg>THẢO LUẬN · NHÓM 7
+    </div>
+    <h1 class="rv" style="font:800 64px/1.14 var(--display);color:var(--ivory)">Phân tích những điểm sáng tạo trong Tư tưởng Hồ Chí Minh về <span style="color:var(--gold);font-style:italic">nội dung xây dựng chủ nghĩa xã hội</span> trong thời kỳ quá độ ở Việt Nam</h1>
+    <div class="rv" style="display:flex;align-items:center;gap:22px">
+      <div style="height:3px;flex:0 0 120px;background:var(--gold)"></div>
+      <div style="font:800 46px/1 var(--display);color:var(--gold);letter-spacing:.04em">1951 – 1979</div>
+    </div>
+    <p class="rv" style="font:400 25px/1.55 var(--serif);color:rgba(247,239,220,.88);max-width:900px">Căn cứ: <i>Bài giảng Tư tưởng Hồ Chí Minh</i> — Chương 1, Chương 2, Chương 3<br>Bộ môn Tư tưởng Hồ Chí Minh · Trường Đại học Thủy lợi</p>
+  </div>
+  <div class="rv" style="position:absolute;right:120px;bottom:90px;font:600 16px/1.6 var(--sans);letter-spacing:.14em;color:rgba(247,239,220,.6);text-align:right">CHƯƠNG 3 · MỤC 3.2.3<br>TƯ TƯỞNG HỒ CHÍ MINH VỀ THỜI KỲ QUÁ ĐỘ LÊN CHỦ NGHĨA XÃ HỘI Ở VIỆT NAM</div>
+</section>
+
+<!-- ===================== SLIDE 2 · BỐ CỤC ===================== -->
+<section class="slide" data-pos="2400,300,3,1" data-title="Bố cục">
+  <div class="frame"></div>
+  <svg class="wm" style="right:-120px;bottom:-160px;width:760px;height:760px" viewBox="-100 -100 200 200"><use href="#sym-lotus" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv">Bố cục trình bày <span class="ref">Bài giảng · Chương 1 – 3</span></div>
+    <h2 class="t rv">Nội dung thảo luận</h2><div class="rule rv"></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:20px 34px;margin-top:10px">
+      <div class="card tint c-brass rv"><h4><span class="kicker"><span class="num">I</span></span>Bối cảnh và cơ sở</h4><p>Tư tưởng Hồ Chí Minh về chủ nghĩa xã hội · Tính tất yếu của việc tiến lên chủ nghĩa xã hội ở Việt Nam</p><p style="font-size:17px;color:var(--ink-2)">Mục 1.1.1 · 2.2.5 · 3.2.1</p></div>
+      <div class="card tint c-crimson rv"><h4><span class="kicker"><span class="num">II</span></span>Thời kỳ quá độ</h4><p>Tính chất, đặc điểm và nhiệm vụ của thời kỳ quá độ</p><p style="font-size:17px;color:var(--ink-2)">Mục 3.2.3.1</p></div>
+      <div class="card tint c-teal rv"><h4><span class="kicker"><span class="num">III</span></span>Nội dung xây dựng</h4><p>Nội dung xây dựng chủ nghĩa xã hội trong thời kỳ quá độ ở nước ta</p><p>a) Trong lĩnh vực chính trị · b) Trong lĩnh vực kinh tế · c) Trong lĩnh vực tư tưởng, văn hoá, xã hội</p><p style="font-size:17px;color:var(--ink-2)">Mục 3.2.3.2</p></div>
+      <div class="card tint c-olive rv"><h4><span class="kicker"><span class="num">IV</span></span>Nguyên tắc và biện pháp</h4><p>Nguyên tắc và biện pháp xây dựng chủ nghĩa xã hội trong thời kỳ quá độ</p><p style="font-size:17px;color:var(--ink-2)">Mục 3.2.3.3</p></div>
+      <div class="card tint c-peace rv" style="grid-column:1 / span 2"><h4><span class="kicker"><span class="num">V</span></span>Những điểm sáng tạo và ý nghĩa</h4><p>“…kết quả sự vận dụng sáng tạo chủ nghĩa Mác-Lênin trong điều kiện cụ thể của nước ta” · Vận dụng tư tưởng Hồ Chí Minh về độc lập dân tộc gắn liền với chủ nghĩa xã hội trong sự nghiệp cách mạng Việt Nam giai đoạn hiện nay</p><p style="font-size:17px;color:var(--ink-2)">Mục 1.1.1 · 3.2 · 3.2.2 · 3.4</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">02</span></div>
+</section>
+
+<!-- ===================== SLIDE 3 · BỐI CẢNH ===================== -->
+<section class="slide" data-pos="4700,-200,-2,1" data-title="Bối cảnh lịch sử">
+  <div class="frame"></div>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">I</span>Bối cảnh lịch sử <span class="ref">Mục 1.1.1 · 2.2.5</span></div>
+    <h2 class="t rv" style="max-width:1300px">Thời kỳ từ 1941-1969: Tư tưởng Hồ Chí Minh <em>tiếp tục phát triển, hoàn thiện và tỏa sáng</em></h2>
+    <div id="tl" style="position:relative;flex:1;margin-top:6px">
+      <div style="position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:6px;background:linear-gradient(90deg,var(--ochre),var(--crimson),var(--maroon))"></div>
+    </div>
+  </div>
+  <figure class="stamp rv" style="right:96px;top:46px;width:230px;transform:rotate(4deg)"><img src="assets/tem-1956.jpg" alt="Tem bưu điện Việt Nam Dân chủ Cộng hòa năm 1956"><figcaption>Tem VNDCCH · 1956</figcaption></figure>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">03</span></div>
+</section>
+
+<!-- ===================== SLIDE 4 · CƠ SỞ ===================== -->
+<section class="slide roomy" data-pos="6900,700,4,1" data-title="Cơ sở lý luận">
+  <div class="frame"></div>
+  <svg class="wm" style="left:-180px;bottom:-220px;width:760px;height:760px" viewBox="-100 -100 200 200"><use href="#sym-sunstar" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">I</span>Cơ sở hình thành <span class="ref">Mục 3.2 · 3.2.1.1 · 3.2.1.2 · 3.2.3</span></div>
+    <h2 class="t rv">Tư tưởng Hồ Chí Minh về <em>chủ nghĩa xã hội</em></h2>
+    <p class="lead rv">Tư tưởng Hồ Chí Minh về chủ nghĩa xã hội và xây dựng chủ nghĩa xã hội ở Việt Nam bao quát những vấn đề cốt lõi, cơ bản nhất <b>trên cơ sở vận dụng và phát triển sáng tạo học thuyết Mác-Lênin</b>.</p>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="card tint c-brass rv"><h4>Tính tất yếu</h4><p>Thời gian, cách thức, tốc độ tiến lên chủ nghĩa xã hội ở mỗi quốc gia, dân tộc diễn ra một cách khác nhau nhưng đó là <span class="hl">một quá trình tất yếu</span>, tuân theo những quy luật khách quan, trước hết là các quy luật trong sản xuất vật chất.</p></div>
+      <div class="card tint c-crimson rv"><h4>Con đường cách mạng</h4><p>Hồ Chí Minh đã khẳng định, con đường cách mạng Việt Nam là <span class="hl">tiến hành giải phóng dân tộc, hoàn thành cách mạng dân tộc dân chủ nhân dân, tiến dần lên chủ nghĩa xã hội</span>.</p></div>
+      <div class="card tint c-teal rv"><h4>Quan niệm</h4><p>Chủ nghĩa xã hội là xã hội thuộc giai đoạn đầu của chủ nghĩa Cộng sản, một xã hội không còn áp bức, bóc lột, <span class="hl">do nhân dân lao động làm chủ</span>, trong đó con người sống ấm no, tự do, hạnh phúc…</p></div>
+    </div>
+    <div class="quote rv">Chỉ có chủ nghĩa xã hội mới là nguồn gốc của tự do, bình đẳng, bác ái, xóa bỏ những bức tường dài ngăn cản con người yêu đoàn kết, yêu thương nhau<span class="src">Hồ Chí Minh · [51]</span></div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">04</span></div>
+</section>
+
+<!-- ===================== SLIDE 5 · TÍNH CHẤT ===================== -->
+<section class="slide s5" data-pos="5200,2300,-3,1" data-title="Tính chất thời kỳ quá độ">
+  <div class="frame"></div>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">II</span>Tính chất thời kỳ quá độ <span class="ref">Mục 3.2.3.1 (a)</span></div>
+    <div class="quote rv" style="font-size:28px">…tiến lên chủ nghĩa xã hội là công cuộc biến đổi xã hội cũ thành xã hội mới - một xã hội hoàn toàn chưa từng có trong lịch sử dân tộc ta nên nó là <b>công cuộc biến đổi khó khăn nhất, sâu sắc nhất</b>; “thậm chí nó còn gian nan, phức tạp hơn cả việc đánh giặc”<span class="src">Hồ Chí Minh · [70]</span></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="card c-crimson rv"><h4>Thứ nhất</h4><p>là một cuộc cách mạng làm đảo lộn mọi mặt của đời sống xã hội cả lực lượng sản xuất, quan hệ sản xuất, kiến trúc thượng tầng. … Như trong Di chúc, Hồ Chí Minh đã coi sự nghiệp xây dựng chủ nghĩa xã hội là <span class="hl">một cuộc chiến đấu khổng lồ</span> của toàn Đảng và toàn dân ta.</p></div>
+      <div class="card c-brass rv"><h4>Thứ hai</h4><p>là công việc mới mẻ đối với Đảng ta, <span class="hl">phải vừa làm, vừa học, vừa rút kinh nghiệm</span>. Đảng, nhà nước và nhân dân ta chưa có nhiều kinh nghiệm, nhất là trên lĩnh vực kinh tế.</p></div>
+      <div class="card c-navy rv"><h4>Thứ ba</h4><p>sự nghiệp của chúng ta bị các thế lực phản động trong và ngoài nước tìm cách chống phá.</p></div>
+    </div>
+    <div class="card tint c-olive rv" style="border-top:none;border-left:8px solid var(--olive)"><p>Hồ Chí Minh luôn nhắc nhở cán bộ, đảng viên trong xây dựng chủ nghĩa xã hội <b>phải thận trọng, tránh nôn nóng, chủ quan, đốt cháy giai đoạn</b>. Vấn đề là phải xác định đúng bước đi và hình thức phù hợp với trình độ lực lượng sản xuất, biết kết hợp các khâu trung gian, quá độ, <span class="hl">tuần tự từng bước, từ thấp đến cao</span>.</p></div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">05</span></div>
+</section>
+
+<!-- ===================== SLIDE 6 · ĐẶC ĐIỂM, NHIỆM VỤ ===================== -->
+<section class="slide roomy" data-pos="2900,2600,2,1" data-title="Đặc điểm và nhiệm vụ">
+  <div class="frame"></div>
+  <svg class="wm" style="right:-160px;top:-140px;width:700px;height:700px" viewBox="-100 -100 200 200"><use href="#sym-lotus" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">II</span>Đặc điểm và nhiệm vụ <span class="ref">Mục 3.2.3.1 (b)</span></div>
+    <div class="rv" style="display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;padding:26px 34px;border-radius:18px;background:linear-gradient(100deg,var(--maroon),var(--crimson));color:var(--ivory);box-shadow:0 10px 30px rgba(110,20,35,.3)">
+      <svg width="96" height="96" viewBox="-50 -50 100 100"><use href="#sym-star" x="-50" y="-50" width="100" height="100" fill="var(--gold)"/></svg>
+      <p style="font:400 30px/1.42 var(--serif)">Đặc điểm to nhất của ta trong thời kỳ quá độ là <b style="color:var(--gold)">từ một nước nông nghiệp lạc hậu tiến thẳng lên chủ nghĩa xã hội không phải kinh qua giai đoạn phát triển tư bản chủ nghĩa.</b></p>
+    </div>
+    <div class="grid" style="grid-template-columns:1.05fr 1fr;align-items:stretch">
+      <div class="card c-teal rv"><h4>Nhiệm vụ</h4>
+        <p>• nhiệm vụ quan trọng nhất của thời kỳ quá độ là <span class="hl">phải xây dựng nền tảng vật chất và kỹ thuật của chủ nghĩa xã hội</span>;</p>
+        <p>• xây dựng tiền đề về kinh tế, chính trị, văn hóa, tư tưởng cho chủ nghĩa xã hội;</p>
+        <p>• cải tạo xã hội cũ, xây dựng xã hội mới, đưa miền Bắc tiến dần lên chủ nghĩa xã hội, có công nghiệp và nông nghiệp hiện đại, có văn hóa và khoa học tiên tiến.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="quote sm rv" style="padding-top:20px;padding-bottom:20px">Trong quá trình cách mạng xã hội chủ nghĩa, chúng ta phải cải tạo nền kinh tế cũ và xây dựng nền kinh tế mới, mà <b>xây dựng là nhiệm vụ chủ chốt và lâu dài</b><span class="src">[71]</span></div>
+        <div class="quote sm rv" style="padding-top:20px;padding-bottom:20px">…phải thay đổi quan hệ sản xuất cũ, xóa bỏ giai cấp bóc lột, xây dựng quan hệ sản xuất mới không có bóc lột, áp bức; phải biến một nước dốt nát, cực khổ thành một nước có văn hóa cao và đời sống tươi vui hạnh phúc<span class="src">[72]</span></div>
+      </div>
+    </div>
+    <p class="rv" style="font:500 22px/1.45 var(--sans);color:var(--ink-2)"><span class="seal" style="margin-right:12px">Lưu ý</span>…trước hết và quan trọng nhất là <b style="color:var(--crimson)">sự lãnh đạo của Đảng Cộng sản và khối đại đoàn kết toàn dân tộc</b> để thực hiện thắng lợi nhiệm vụ của thời kỳ quá độ.</p>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">06</span></div>
+</section>
+
+<!-- ===================== SLIDE 7 · CHƯƠNG MỤC III ===================== -->
+<section class="slide dark" data-pos="200,3700,0,1.6" data-title="III. Nội dung xây dựng">
+  <div class="frame"></div>
+  <svg class="wm" style="left:50%;top:50%;width:1800px;height:1800px;margin:-900px 0 0 -900px" viewBox="-100 -100 200 200"><use href="#sym-sunstar" x="-100" y="-100" width="200" height="200"/></svg>
+  <div style="position:absolute;left:110px;top:90px;right:110px;display:flex;flex-direction:column;gap:18px">
+    <div class="kicker rv" style="color:var(--gold)"><span class="num" style="background:var(--gold);color:var(--maroon)">III</span>Mục 3.2.3.2</div>
+    <h2 class="rv" style="font:800 54px/1.12 var(--display);color:var(--ivory);white-space:nowrap">Nội dung xây dựng chủ nghĩa xã hội <span style="color:var(--gold);font-style:italic">trong thời kỳ quá độ ở nước ta</span></h2>
+  </div>
+  <div style="position:absolute;left:110px;right:110px;bottom:80px;top:270px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px">
+    <div class="rv" style="display:flex;flex-direction:column;gap:14px"><div class="pcol"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-politics"/></svg></div><div style="font:800 25px/1.2 var(--sans);letter-spacing:.08em;color:var(--gold);text-align:center">a) CHÍNH TRỊ</div></div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:14px"><div class="pcol"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-industry"/></svg></div><div style="font:800 25px/1.2 var(--sans);letter-spacing:.08em;color:var(--gold);text-align:center">b) KINH TẾ</div></div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:14px"><div class="pcol"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-culture"/></svg></div><div style="font:800 25px/1.2 var(--sans);letter-spacing:.08em;color:var(--gold);text-align:center">c) TƯ TƯỞNG, VĂN HOÁ, XÃ HỘI</div></div>
+  </div>
+</section>
+
+<!-- ===================== SLIDE 8 · CHÍNH TRỊ ===================== -->
+<section class="slide" data-pos="-200,5900,-3,1" data-title="a) Lĩnh vực chính trị">
+  <div class="frame"></div>
+  <div class="split">
+    <div class="poster rv"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-politics"/></svg></div>
+    <div class="inner">
+      <div class="kicker rv"><span class="num">a</span>Trong lĩnh vực chính trị <span class="ref">Mục 3.2.3.2 (a)</span></div>
+      <h2 class="t rv">Nội dung <em>quan trọng nhất</em> là:</h2>
+      <div class="grid" style="grid-template-columns:1fr;gap:16px">
+        <div class="card tint c-crimson rv" style="border-top:none;border-left:8px solid var(--crimson)"><h4><svg class="ic" viewBox="-50 -50 100 100"><use href="#sym-star" x="-50" y="-50" width="100" height="100" fill="currentColor"/></svg>Vai trò lãnh đạo của Đảng</h4><p>giữ vững và phát huy vai trò lãnh đạo của Đảng Cộng sản,</p></div>
+        <div class="card tint c-brass rv" style="border-top:none;border-left:8px solid var(--brass)"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-4 3-6 6-6s6 2 6 6M10 20c0-4 3-6 6-6s6 2 6 6"/></svg>Mặt trận dân tộc thống nhất</h4><p>củng cố và mở rộng mặt trận dân tộc thống nhất, nòng cốt là <span class="hl">liên minh công nhân, nông dân, trí thức</span> do Đảng Cộng sản lãnh đạo;</p></div>
+        <div class="card tint c-navy rv" style="border-top:none;border-left:8px solid var(--navy)"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21v-7M15 21v-7M2 10l10-7 10 7z"/></svg>Hệ thống chính trị</h4><p>củng cố tăng cường sức mạnh của toàn bộ hệ thống chính trị và các thành tố của nó.</p></div>
+      </div>
+      <div class="grid rv" style="grid-template-columns:1fr 1fr;gap:16px">
+        <div class="quote" style="font-size:24px;padding:20px 26px 20px 84px">Chế độ ta là chế độ dân chủ. Tức là nhân dân làm chủ<span class="src">[64] · Mục 3.2.2.1</span></div>
+        <div class="quote" style="font-size:24px;padding:20px 26px 20px 84px">Nhà nước có hai chức năng: Dân chủ với nhân dân và chuyên chính với kẻ thù của nhân dân.<span class="src">Mục 3.2.2.1</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">08</span></div>
+</section>
+
+<!-- ===================== SLIDE 9 · KINH TẾ (1) ===================== -->
+<section class="slide" data-pos="2200,6200,2,1" data-title="b) Kinh tế — ngành và cơ cấu">
+  <div class="frame"></div>
+  <div class="split">
+    <div class="poster rv"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-industry"/></svg></div>
+    <div class="inner">
+      <div class="kicker rv"><span class="num">b</span>Trong lĩnh vực kinh tế (1) <span class="ref">Mục 3.2.3.2 (b) · 3.2.2.1</span></div>
+      <h2 class="t rv" style="font-size:52px">Người nhấn mạnh việc tăng năng suất lao động trên cơ sở tiến hành <em>công nghiệp hoá xã hội chủ nghĩa</em>.</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div class="card tint c-olive rv"><h4>Nông nghiệp</h4><p>Người quan niệm <span class="hl">lấy nông nghiệp làm mặt trận hàng đầu</span>,</p></div>
+        <div class="card tint c-brass rv"><h4>Thương nghiệp</h4><p>củng cố thương nghiệp làm <span class="hl">cầu nối tốt nhất</span> giữa các ngành sản xuất xã hội;</p><p style="font-size:19px;color:var(--ink-2)">(Mục 3.2.2.1) thương nghiệp đưa hàng đến nông thôn phục vụ cho nông dân, thương nghiệp đưa nông sản, nguyên liệu cho thành thị tiêu dùng.</p></div>
+        <div class="card tint c-teal rv" style="grid-column:span 2"><h4>Cơ cấu kinh tế</h4><p>xây dựng cơ cấu kinh tế ngành, cơ cấu các thành phần kinh tế, cơ cấu vùng kinh tế và lãnh thổ.</p></div>
+      </div>
+      <div class="quote rv" style="font-size:25px">…công nghiệp và nông nghiệp là hai chân của nền kinh tế nước nhà.<span class="src">Mục 3.2.2.1</span></div>
+      <p class="rv" style="font:600 23px/1.45 var(--sans);color:var(--maroon)"><span class="seal" style="margin-right:12px">Trích</span>Kẻ thù muốn đè bẹp ta về kinh tế thay bằng quân sự, vì vậy ta phải phát triển kinh tế.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">09</span></div>
+</section>
+
+<!-- ===================== SLIDE 10 · KINH TẾ (2) ===================== -->
+<section class="slide roomy" data-pos="4500,5800,-2,1" data-title="b) Kinh tế nhiều thành phần" style="--pw:27%">
+  <div class="frame"></div>
+  <div class="split" style="--pw:27%">
+    <div class="poster rv"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-agri"/></svg></div>
+    <div class="inner" style="gap:18px">
+      <div class="kicker rv"><span class="num">b</span>Trong lĩnh vực kinh tế (2) <span class="ref">Mục 3.2.3.2 (b)</span></div>
+      <h2 class="t rv" style="font-size:46px">Ở nước ta, Hồ Chí Minh là <em>người đầu tiên</em> chủ trương phát triển cơ cấu kinh tế nhiều thành phần trong suốt thời kỳ quá độ lên chủ nghĩa xã hội.</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card tint c-teal rv"><h4>Kinh tế quốc doanh</h4><p>Nước ta cần ưu tiên phát triển kinh tế quốc doanh để tạo nền tảng vật chất cho chủ nghĩa xã hội, thúc đẩy việc cải tạo xã hội chủ nghĩa.</p></div>
+        <div class="card tint c-olive rv"><h4>Kinh tế hợp tác xã</h4><p>là hình thức sở hữu tập thể của nhân dân lao động, Nhà nước cần đặc biệt khuyến khích, hướng dẫn và giúp đỡ nó phát triển. … Hồ Chí Minh nhấn mạnh nguyên tắc <span class="hl">dần dần, từ thấp đến cao, tự nguyện, cùng có lợi, chống chủ quan, gò ép, hình thức</span>.</p></div>
+        <div class="card tint c-brass rv"><h4>Thủ công · lao động riêng lẻ</h4><p>Nhà nước bảo hộ quyền sở hữu về tư liệu sản xuất, ra sức hướng dẫn và giúp họ cải tiến cách làm ăn, khuyến khích họ đi vào con đường hợp tác.</p></div>
+        <div class="card tint c-crimson rv"><h4>Nhà tư sản công thương</h4><p>Nhà nước không xóa bỏ quyền sở hữu về tư liệu sản xuất và của cải khác của họ, … khuyến khích và giúp đỡ họ cải tạo theo chủ nghĩa xã hội <span class="hl">bằng hình thức tư bản nhà nước</span>.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">10</span></div>
+</section>
+
+<!-- ===================== SLIDE 11 · KINH TẾ (3) ===================== -->
+<section class="slide roomy" data-pos="6800,6300,3,1" data-title="b) Sở hữu, quản lý, phân phối">
+  <div class="frame"></div>
+  <svg class="wm" style="right:-200px;bottom:-200px;width:800px;height:800px" viewBox="-100 -100 200 200"><use href="#sym-gear" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">b</span>Trong lĩnh vực kinh tế (3) <span class="ref">Mục 3.2.3.2 (b) · 3.2.2.1</span></div>
+    <h2 class="t rv">Sở hữu · quản lý · phân phối · <em>chế độ khoán</em></h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card tint c-teal rv"><h4>Sở hữu</h4><p>Chủ trương <span class="hl">đa dạng hoá các loại hình sở hữu</span> về tư liệu sản xuất, Nhà nước bảo hộ quyền sở hữu về tư liệu sản xuất;</p></div>
+      <div class="card tint c-crimson rv"><h4>Phân phối và quản lý</h4><p>đồng thời coi trọng quan hệ phân phối và quản lý kinh tế, <span class="hl">sử dụng hình thức và phương tiện của chủ nghĩa tư bản để xây dựng chủ nghĩa xã hội</span>.</p></div>
+      <div class="card tint c-navy rv"><h4>Hạch toán</h4><p>Trong quản lý kinh tế phải dựa trên cơ sở hạch toán đem lại hiệu quả cao, sử dụng tốt các đòn bảy trong phát triển sản xuất.</p></div>
+      <div class="card tint c-olive rv"><h4>Phân phối theo lao động</h4><p>Người chủ trương chỉ rõ các điều kiện thực hiện nguyên tắc phân phối theo lao động: <span class="hl">làm nhiều hưởng nhiều, làm ít hưởng ít, không làm không hưởng</span>.</p></div>
+    </div>
+    <div class="rv" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;padding:22px 30px;border-radius:16px;background:linear-gradient(100deg,rgba(168,122,34,.16),rgba(168,122,34,.05));border:2px solid var(--brass)">
+      <p style="font:400 24px/1.5 var(--sans)">Hồ Chí Minh cũng <b style="color:var(--crimson)">bước đầu đề cập đến vấn đề khoán trong sản xuất</b>. Theo Người, chế độ khoán là một điều kiện của chủ nghĩa xã hội, nó khuyến khích người công nhân luôn luôn tiến bộ cho nhà máy tiến bộ, <span class="hl">làm khoán là ích chung và lợi riêng</span>.</p>
+      <span class="seal" style="font-size:20px;padding:12px 16px">Khoán</span>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">11</span></div>
+</section>
+
+<!-- ===================== SLIDE 12 · VĂN HOÁ ===================== -->
+<section class="slide" data-pos="9000,5700,-2,1" data-title="c) Tư tưởng, văn hoá, xã hội">
+  <div class="frame"></div>
+  <div class="split">
+    <div class="poster rv"><svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMax slice"><use href="#poster-culture"/></svg></div>
+    <div class="inner" style="padding-right:330px">
+      <div class="kicker rv"><span class="num">c</span>Tư tưởng, văn hoá, xã hội <span class="ref">Mục 3.2.3.2 (c)</span></div>
+      <h2 class="t rv" style="font-size:50px">Muốn cải tạo xã hội chủ nghĩa thì <em>phải cải tạo chính mình</em></h2>
+      <div class="grid" style="grid-template-columns:1fr;gap:16px">
+        <div class="card tint c-crimson rv" style="border-top:none;border-left:8px solid var(--crimson)"><h4>Khắc phục</h4><p>phải khắc phục sự yếu kém về kiến thức, sự bấp bênh về chính trị, sự trì trệ về kinh tế, lạc hậu về văn hoá, … là khe hở mà chủ nghĩa tư bản dễ dàng lợi dụng.</p></div>
+        <div class="card tint c-peace rv" style="border-top:none;border-left:8px solid var(--peace)"><h4>Tư tưởng xã hội chủ nghĩa</h4><p>…nếu không có tư tưởng xã hội chủ nghĩa thì không làm việc xã hội chủ nghĩa được.</p></div>
+        <div class="card tint c-teal rv" style="border-top:none;border-left:8px solid var(--teal)"><h4>Học thức · dân trí · nhân tài</h4><p>muốn xây dựng chủ nghĩa xã hội, trước hết phải có học thức, cần phải học văn hóa, chính trị, kỹ thuật … Người cũng coi trọng nâng cao dân trí, đào tạo và sử dụng nhân tài, khẳng định vai trò to lớn của văn hóa trong đời sống xã hội.</p></div>
+      </div>
+    </div>
+  </div>
+  <figure class="stamp rv" style="right:80px;top:120px;width:250px;transform:rotate(3deg)"><img src="assets/tem-tranh-dan-gian.jpg" alt="Tem Việt Nam Dân chủ Cộng hòa: Tranh dân gian"><figcaption>Tem VNDCCH · Tranh dân gian</figcaption></figure>
+  <div class="rv" style="position:absolute;right:70px;top:610px;width:270px;padding:18px 20px;border-radius:14px;background:rgba(44,106,158,.1);border:2px solid var(--peace);font:italic 400 21px/1.45 var(--serif);color:var(--navy)">“văn hóa phải xã hội chủ nghĩa về nội dung và dân tộc về hình thức”<span style="display:block;margin-top:6px;font:700 13px/1.3 var(--sans);font-style:normal;letter-spacing:.08em;color:var(--brass)">[68] · MỤC 3.2.2.1</span></div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">12</span></div>
+</section>
+
+<!-- ===================== SLIDE 13 · NGUYÊN TẮC ===================== -->
+<section class="slide roomy" data-pos="9500,3400,3,1" data-title="Nguyên tắc">
+  <div class="frame"></div>
+  <svg class="wm" style="left:-200px;top:-200px;width:760px;height:760px" viewBox="-100 -100 200 200"><use href="#sym-lotus" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">IV</span>Nguyên tắc xây dựng chủ nghĩa xã hội <span class="ref">Mục 3.2.3.3 (a)</span></div>
+    <h2 class="t rv">Về <em>nguyên tắc</em> xây dựng chủ nghĩa xã hội</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="card tint c-crimson rv"><h4>Thứ nhất</h4><p><b>mọi tư tưởng, hành động phải được thực hiện trên nền tảng chủ nghĩa Mác-Lênin.</b></p><p>…phải cụ thể hóa chủ nghĩa Mác-Lênin cho thích hợp với điều kiện hoàn cảnh từng lúc và từng nơi.</p></div>
+      <div class="card tint c-brass rv"><h4>Thứ hai</h4><p><b>phải giữ vững độc lập dân tộc.</b></p><p>…độc lập dân tộc là điều kiện tiên quyết để thực hiện chủ nghĩa xã hội và chủ nghĩa xã hội là cơ sở bảo đảm vững chắc cho độc lập dân tộc…</p></div>
+      <div class="card tint c-teal rv"><h4>Thứ ba</h4><p><b>phải đoàn kết, học tập kinh nghiệm của các nước.</b></p><p>…không được áp đặt những kinh nghiệm ấy một cách máy móc mà <span class="hl">phải vận dụng nó một cách sáng tạo</span>.</p></div>
+    </div>
+    <div class="quote rv" style="font-size:29px">…Việt Nam không thể giống Liên Xô, vì Liên Xô có phong tục tập quán khác, có lịch sử địa lý khác, <b>Việt Nam có thể đi con đường khác để tiến lên chủ nghĩa xã hội</b>.<span class="src">Mục 3.2.3.3 (a)</span></div>
+    <div class="card tint c-olive rv" style="border-top:none;border-left:8px solid var(--olive)"><h4>Mối quan hệ giữa độc lập dân tộc và chủ nghĩa xã hội · Mục 3.3.2</h4><p>Độc lập dân tộc và chủ nghĩa xã hội luôn luôn gắn liền với nhau, làm tiền đề, điều kiện đảm bảo cho nhau phát triển.</p></div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">13</span></div>
+</section>
+
+<!-- ===================== SLIDE 14 · BIỆN PHÁP ===================== -->
+<section class="slide roomy" data-pos="9200,1200,-3,1" data-title="Biện pháp">
+  <div class="frame"></div>
+  <div class="inner" style="padding-right:470px">
+    <div class="kicker rv"><span class="num">IV</span>Biện pháp xây dựng chủ nghĩa xã hội <span class="ref">Mục 3.2.3.3 (b)</span></div>
+    <h2 class="t rv">Người đã chỉ đạo <em>một số cách làm cụ thể</em>:</h2>
+    <div class="grid" style="grid-template-columns:1fr;gap:16px">
+      <div class="card tint c-brass rv" style="border-top:none;border-left:8px solid var(--brass)"><h4><span class="num" style="font:800 22px/1 var(--display)">1</span></h4><p>Thực hiện cải tạo xã hội cũ, xây dựng xã hội mới, kết hợp cải tạo với xây dựng, <span class="hl">xây dựng làm chính</span>.</p></div>
+      <div class="card tint c-crimson rv" style="border-top:none;border-left:8px solid var(--crimson)"><h4><span class="num" style="font:800 22px/1 var(--display)">2</span></h4><p>Kết hợp xây dựng với bảo vệ, <span class="hl">tiến hành hai nhiệm vụ chiến lược khác nhau trong phạm vi một quốc gia</span>.</p></div>
+      <div class="card tint c-teal rv" style="border-top:none;border-left:8px solid var(--teal)"><h4><span class="num" style="font:800 22px/1 var(--display)">3</span></h4><p>Xây dựng chủ nghĩa xã hội phải có kế hoạch, biện pháp, quyết tâm thực hiện thắng lợi kế hoạch.</p></div>
+      <div class="card tint c-olive rv" style="border-top:none;border-left:8px solid var(--olive)"><h4><span class="num" style="font:800 22px/1 var(--display)">4</span></h4><p>Trong điều kiện nước ta, biện pháp cơ bản quyết định lâu dài trong xây dựng chủ nghĩa xã hội là phải <span class="hl">huy động hết các nguồn lực vốn có trong dân để làm lợi cho dân</span> dưới sự lãnh đạo của Đảng Cộng sản Việt Nam.</p></div>
+    </div>
+  </div>
+  <figure class="stamp rv" style="right:110px;top:90px;width:300px;transform:rotate(-4deg)"><img src="assets/tem-1966.jpg" alt="Tem VNDCCH năm 1966"><figcaption>Tem VNDCCH · 1966 — xây dựng gắn với bảo vệ miền Bắc</figcaption></figure>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">14</span></div>
+</section>
+
+<!-- ===================== SLIDE 15 · ĐIỂM SÁNG TẠO (1) ===================== -->
+<section class="slide roomy mid" data-pos="11600,800,2,1" data-title="Điểm sáng tạo (1)">
+  <div class="frame"></div>
+  <svg class="wm" style="right:-200px;top:-260px;width:820px;height:820px" viewBox="-100 -100 200 200"><use href="#sym-sunstar" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">V</span>Những điểm sáng tạo (1) <span class="ref">Mục 1.1.1 · 3.2.3</span></div>
+    <div class="quote rv" style="font-size:28px">Tư tưởng Hồ Chí Minh là kết quả sự vận dụng sáng tạo chủ nghĩa Mác-Lênin trong điều kiện cụ thể của nước ta<span class="src">Đại hội VII (6-1991)</span></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;flex:1">
+      <div class="card tint c-maroon rv" style="grid-row:span 2;display:flex;flex-direction:column;justify-content:center"><h4>Sáng tạo về nhận thức thời kỳ quá độ</h4><p style="font:400 27px/1.45 var(--serif)">…<b>từ một nước nông nghiệp lạc hậu tiến thẳng lên chủ nghĩa xã hội không phải kinh qua giai đoạn phát triển tư bản chủ nghĩa.</b></p><p>…phải thận trọng, tránh nôn nóng, chủ quan, đốt cháy giai đoạn… tuần tự từng bước, từ thấp đến cao.</p></div>
+      <div class="card tint c-brass rv"><h4>Sáng tạo về Kinh tế</h4><p>Hồ Chí Minh là <span class="hl">người đầu tiên</span> chủ trương phát triển cơ cấu kinh tế nhiều thành phần trong suốt thời kỳ quá độ…</p></div>
+      <div class="card tint c-olive rv"><h4>Sáng tạo về Kinh tế</h4><p>lấy nông nghiệp làm mặt trận hàng đầu · công nghiệp và nông nghiệp là hai chân của nền kinh tế nước nhà.</p></div>
+      <div class="card tint c-teal rv"><h4>Sáng tạo về Kinh tế</h4><p>sử dụng hình thức và phương tiện của chủ nghĩa tư bản để xây dựng chủ nghĩa xã hội · bước đầu đề cập đến vấn đề khoán trong sản xuất.</p></div>
+      <div class="card tint c-crimson rv"><h4>Sáng tạo về Chính trị</h4><p>củng cố và mở rộng mặt trận dân tộc thống nhất, nòng cốt là liên minh công nhân, nông dân, trí thức do Đảng Cộng sản lãnh đạo.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">15</span></div>
+</section>
+
+<!-- ===================== SLIDE 16 · ĐIỂM SÁNG TẠO (2) ===================== -->
+<section class="slide roomy mid" data-pos="13900,1400,-2,1" data-title="Điểm sáng tạo (2)">
+  <div class="frame"></div>
+  <svg class="wm" style="left:-200px;bottom:-240px;width:800px;height:800px" viewBox="-100 -100 200 200"><use href="#sym-lotus" x="-100" y="-100" width="200" height="200"/></svg>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">V</span>Những điểm sáng tạo (2) <span class="ref">Mục 3.2.2 · 3.2.3</span></div>
+    <h2 class="t rv">Văn hoá · Con người · <em>Phương pháp</em></h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;flex:1;grid-auto-rows:1fr">
+      <div class="card tint c-peace rv"><h4>Sáng tạo về Văn hoá – tư tưởng</h4><p>muốn cải tạo xã hội chủ nghĩa thì phải cải tạo chính mình · văn hóa phải xã hội chủ nghĩa về nội dung và dân tộc về hình thức.</p></div>
+      <div class="card tint c-crimson rv" style="border-top-color:var(--red-seal)"><h4>Vai trò Con người</h4><p>động lực quan trọng và quyết định nhất là <span class="hl">con người, nhân dân lao động, nòng cốt là liên minh công - nông - trí thức</span> · huy động hết các nguồn lực vốn có trong dân để làm lợi cho dân.</p></div>
+      <div class="card tint c-navy rv"><h4>Sáng tạo về Phương pháp</h4><p>Việt Nam có thể đi con đường khác để tiến lên chủ nghĩa xã hội · Kết hợp xây dựng với bảo vệ, tiến hành hai nhiệm vụ chiến lược khác nhau trong phạm vi một quốc gia.</p></div>
+      <div class="card tint c-maroon rv"><h4>Nét độc đáo trong phong cách tư duy</h4><p>…chỉ ra yếu tố kìm hãm, triệt tiêu nguồn lực vốn có của chủ nghĩa xã hội. Đó là: … chủ nghĩa cá nhân - kẻ thù hung ác của chủ nghĩa xã hội; tham ô lãng phí - bạn đồng minh của thực dân phong kiến; bè phái mất đoàn kết nội bộ… mà Người gọi là <span class="hl">giặc nội xâm</span>.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">16</span></div>
+</section>
+
+<!-- ===================== SLIDE 17 · Ý NGHĨA ===================== -->
+<section class="slide roomy" data-pos="13500,3700,3,1" data-title="Ý nghĩa và vận dụng">
+  <div class="frame"></div>
+  <div class="inner">
+    <div class="kicker rv"><span class="num">V</span>Ý nghĩa và vận dụng <span class="ref">Mục 3.2 · 3.4</span></div>
+    <div class="quote rv" style="font-size:28px">Những kiến giải của Hồ Chí Minh về chủ nghĩa xã hội với những sáng tạo có ý nghĩa lý luận và thực tiễn to lớn <b>đã, đang và sẽ tiếp tục được vận dụng vào công cuộc đổi mới</b>, xây dựng chủ nghĩa xã hội ở nước ta hiện nay.<span class="src">Mục 3.2</span></div>
+    <p class="lead rv">Những luận điểm đó là <b>tài sản vô giá, là cơ sở lý luận, kim chỉ nam</b>…</p>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card tint c-crimson rv"><h4>3.4.1</h4><p>Kiên định mục tiêu và con đường cách mạng mà Hồ Chí Minh đã xác định</p></div>
+      <div class="card tint c-peace rv"><h4>3.4.2</h4><p>Phát huy sức mạnh dân chủ xã hội chủ nghĩa</p></div>
+      <div class="card tint c-teal rv"><h4>3.4.3</h4><p>Củng cố, kiện toàn, phát huy sức mạnh và hiệu quả hoạt động của toàn bộ hệ thống chính trị</p></div>
+      <div class="card tint c-brass rv"><h4>3.4.4</h4><p>Đấu tranh chống những biểu hiện suy thoái về tư tưởng chính trị; suy thoái về đạo đức, lối sống và “tự diễn biến”, “tự chuyển hóa” trong nội bộ</p></div>
+    </div>
+    <p class="rv" style="font:600 23px/1.45 var(--sans);color:var(--maroon)"><span class="seal" style="margin-right:12px">Hoài bão</span>Dân giàu, nước mạnh, xã hội công bằng, dân chủ, văn minh</p>
+  </div>
+  <div class="foot"><span>Nhóm 7 · Tư tưởng Hồ Chí Minh</span><span class="pg">17</span></div>
+</section>
+
+<!-- ===================== SLIDE 18 · KẾT ===================== -->
+<section class="slide dark" data-pos="12000,6200,0,1.4" data-title="Kết luận">
+  <div class="frame"></div>
+  <svg class="wm" style="left:50%;top:50%;width:1700px;height:1700px;margin:-850px 0 0 -850px" viewBox="-100 -100 200 200"><use href="#sym-sunstar" x="-100" y="-100" width="200" height="200"/></svg>
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:0 220px;text-align:center">
+    <svg class="rv" width="90" height="90" viewBox="-50 -50 100 100"><use href="#sym-star" x="-50" y="-50" width="100" height="100" fill="var(--gold)"/></svg>
+    <p class="rv" style="font:italic 400 40px/1.5 var(--serif);color:var(--ivory)">“Toàn Đảng, toàn dân ta đoàn kết phấn đấu, xây dựng một nước Việt Nam hoà bình, thống nhất, độc lập, dân chủ và giàu mạnh, và góp phần xứng đáng vào sự nghiệp cách mạng thế giới”</p>
+    <div class="rv" style="font:700 18px/1 var(--sans);letter-spacing:.2em;color:var(--gold)">ĐIỀU MONG MỎI CUỐI CÙNG CỦA HỒ CHÍ MINH · MỤC 2.2.5 · [19]</div>
+    <div class="rv" style="display:flex;align-items:center;gap:30px;margin-top:10px">
+      <img src="assets/hcm-seal-1949.jpg" alt="Chữ ký và ấn triện của Chủ tịch Hồ Chí Minh, 1949" style="height:150px;border-radius:8px;border:2px solid var(--gold);filter:sepia(.3)">
+      <div style="text-align:left;font:500 16px/1.5 var(--sans);color:rgba(247,239,220,.7);max-width:330px">Bút tích và ấn triện của Chủ tịch Hồ Chí Minh (tháng 9-1949)</div>
+    </div>
+    <h2 class="rv" style="font:800 72px/1.1 var(--display);color:var(--gold);margin-top:10px">Xin trân trọng cảm ơn!</h2>
+    <div class="rv" style="font:600 20px/1 var(--sans);letter-spacing:.24em;color:rgba(247,239,220,.75)">NHÓM 7 · THẢO LUẬN TƯ TƯỞNG HỒ CHÍ MINH</div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="hud">
+  <button id="bPrev" title="Trang trước (←)">◀</button>
+  <span id="counter">1 / 18</span>
+  <button id="bNext" title="Trang sau (→)">▶</button>
+  <button id="bOver" title="Toàn cảnh (O)">TOÀN CẢNH</button>
+  <button id="bFull" title="Toàn màn hình (F)">⛶</button>
+</div>
+<div id="hint">← → / Space: chuyển trang · O: toàn cảnh · F: toàn màn hình<br>Kéo chuột / lăn chuột: di chuyển, phóng to canvas</div>
+
+<!-- ===================== SVG ASSETS ===================== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="sym-star" viewBox="-50 -50 100 100"><path d="M0,-47 L11.1,-15.3 L44.7,-14.5 L18,5.8 L27.6,38 L0,19 L-27.6,38 L-18,5.8 L-44.7,-14.5 L-11.1,-15.3Z"/></symbol>
+    <symbol id="sym-sunstar" viewBox="-100 -100 200 200"><g fill="currentColor" id="sunrays"></g><circle r="44" fill="none" stroke="currentColor" stroke-width="1.4"/><circle r="50" fill="none" stroke="currentColor" stroke-width=".6"/><use href="#sym-star" x="-34" y="-34" width="68" height="68" fill="currentColor"/></symbol>
+    <symbol id="sym-lotus" viewBox="-100 -100 200 200"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M0,40 C-14,10 -14,-30 0,-62 C14,-30 14,10 0,40Z"/>
+      <path d="M0,40 C-30,22 -46,-8 -40,-44 C-20,-30 -8,-2 0,40"/>
+      <path d="M0,40 C30,22 46,-8 40,-44 C20,-30 8,-2 0,40"/>
+      <path d="M0,42 C-40,40 -70,18 -80,-14 C-52,-12 -24,8 0,42"/>
+      <path d="M0,42 C40,40 70,18 80,-14 C52,-12 24,8 0,42"/>
+      <path d="M-86,52 C-50,62 50,62 86,52"/><path d="M-60,66 C-30,72 30,72 60,66"/>
+      <path d="M0,-62 L0,-80"/><circle cx="0" cy="-86" r="4"/></g></symbol>
+    <symbol id="sym-gear" viewBox="-100 -100 200 200"><path id="gearpath" fill="none" stroke="currentColor" stroke-width="2"/><circle r="26" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+
+    <!-- Tranh cổ động: CHÍNH TRỊ -->
+    <symbol id="poster-politics" viewBox="0 0 600 1000">
+      <rect width="600" height="1000" fill="#8f1a28"/>
+      <g class="rays" data-rays="300,400,28,1100,#c8473e,1"></g>
+      <circle cx="300" cy="400" r="210" fill="#b5322c"/>
+      <circle cx="300" cy="400" r="170" fill="#d9a441"/>
+      <use href="#sym-star" x="155" y="255" width="290" height="290" fill="#8f1a28"/>
+      <g fill="#4a0d17">
+        <g class="crowd" data-crowd="0,700,9,62,#4a0d17"></g>
+      </g>
+      <path d="M0,760 Q150,720 300,745 T600,730 L600,1000 L0,1000Z" fill="#5c0f1c"/>
+      <path d="M100,620 L100,330" stroke="#3a0a12" stroke-width="8"/>
+      <path d="M104,332 C160,300 200,360 260,330 L260,430 C200,460 160,400 104,432Z" fill="#d23a2e"/>
+      <use href="#sym-star" x="160" y="352" width="56" height="56" fill="#f2c94c"/>
+      <rect x="0" y="842" width="600" height="120" fill="#f2e3bf"/>
+      <text x="300" y="917" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="44" fill="#8f1a28" letter-spacing="1">NHÂN DÂN LÀM CHỦ</text>
+      <rect x="0" y="842" width="600" height="8" fill="#d9a441"/><rect x="0" y="954" width="600" height="8" fill="#d9a441"/>
+    </symbol>
+
+    <!-- Tranh cổ động: CÔNG NGHIỆP -->
+    <symbol id="poster-industry" viewBox="0 0 600 1000">
+      <rect width="600" height="1000" fill="#143e4a"/>
+      <g class="rays" data-rays="440,560,26,1100,#1f5f66,1"></g>
+      <circle cx="440" cy="560" r="150" fill="#d9a441"/>
+      <g class="gear" data-gear="440,560,118,92,14,#c0781f"></g>
+      <circle cx="440" cy="560" r="40" fill="#143e4a"/>
+      <g fill="#0b2731">
+        <rect x="40" y="380" width="44" height="320"/><rect x="120" y="300" width="50" height="400"/><rect x="210" y="430" width="38" height="270"/>
+        <path d="M0,700 L0,560 L80,600 L80,560 L160,600 L160,560 L240,600 L240,560 L320,600 L320,700Z"/>
+        <rect x="0" y="690" width="600" height="160"/>
+      </g>
+      <g fill="#f2e3bf" opacity=".55"><circle cx="62" cy="352" r="22"/><circle cx="84" cy="318" r="28"/><circle cx="118" cy="282" r="30"/><circle cx="145" cy="270" r="24"/><circle cx="172" cy="236" r="32"/><circle cx="214" cy="210" r="26"/><circle cx="229" cy="404" r="18"/><circle cx="250" cy="372" r="24"/></g>
+      <g fill="#d9a441"><rect x="20" y="730" width="560" height="10"/></g>
+      <g transform="translate(300,620) rotate(-35)"><rect x="-12" y="-40" width="24" height="270" rx="6" fill="#8b4a22"/><rect x="-70" y="-90" width="140" height="62" rx="8" fill="#c8473e"/><rect x="-70" y="-90" width="140" height="14" fill="#e06a55"/></g>
+      <rect x="0" y="842" width="600" height="120" fill="#f2e3bf"/>
+      <text x="300" y="893" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="33" fill="#143e4a" letter-spacing="2">CÔNG NGHIỆP HOÁ</text>
+      <text x="300" y="940" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="33" fill="#9b1c2c" letter-spacing="2">XÃ HỘI CHỦ NGHĨA</text>
+      <rect x="0" y="842" width="600" height="8" fill="#d9a441"/><rect x="0" y="954" width="600" height="8" fill="#d9a441"/>
+    </symbol>
+
+    <!-- Tranh cổ động: NÔNG NGHIỆP -->
+    <symbol id="poster-agri" viewBox="0 0 600 1000">
+      <rect width="600" height="1000" fill="#e3b04b"/>
+      <g class="rays" data-rays="300,430,24,1000,#f0c868,1"></g>
+      <circle cx="300" cy="430" r="140" fill="#c8473e"/>
+      <path d="M0,470 Q300,420 600,470 L600,1000 L0,1000Z" fill="#6f7f2c"/>
+      <path d="M0,540 Q300,490 600,540 L600,600 Q300,550 0,600Z" fill="#8a9a3a"/>
+      <path d="M0,650 Q300,600 600,650 L600,710 Q300,660 0,710Z" fill="#8a9a3a"/>
+      <path d="M0,760 Q300,710 600,760 L600,830 Q300,780 0,830Z" fill="#8a9a3a"/>
+      <g class="sheaf" data-sheaf="300,780"></g>
+      <path d="M430,560 C520,560 560,640 520,720 C540,640 500,590 430,592Z" fill="#f2e3bf"/>
+      <rect x="418" y="586" width="16" height="70" rx="5" transform="rotate(-30 426 590)" fill="#5c3a1a"/>
+      <rect x="0" y="842" width="600" height="120" fill="#f2e3bf"/>
+      <text x="300" y="893" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="33" fill="#4d5c1d" letter-spacing="2">NÔNG NGHIỆP</text>
+      <text x="300" y="940" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="33" fill="#9b1c2c" letter-spacing="2">MẶT TRẬN HÀNG ĐẦU</text>
+      <rect x="0" y="842" width="600" height="8" fill="#9b1c2c"/><rect x="0" y="954" width="600" height="8" fill="#9b1c2c"/>
+    </symbol>
+
+    <!-- Tranh cổ động: VĂN HOÁ -->
+    <symbol id="poster-culture" viewBox="0 0 600 1000">
+      <rect width="600" height="1000" fill="#1d4f7a"/>
+      <g class="rays" data-rays="300,360,30,1100,#2c6a9e,1"></g>
+      <circle cx="300" cy="360" r="190" fill="#24609a"/>
+      <g transform="translate(300,330) scale(1.9)" color="#e3c06f"><use href="#sym-lotus" x="-100" y="-100" width="200" height="200"/></g>
+      <path d="M282,520 L318,520 L310,700 L290,700Z" fill="#8b4a22"/>
+      <path d="M300,410 C340,450 345,490 300,525 C255,490 262,450 300,410Z" fill="#e2552f"/>
+      <path d="M300,445 C322,470 322,495 300,515 C278,495 280,470 300,445Z" fill="#f2c94c"/>
+      <path d="M80,760 L300,705 L300,830 L80,880Z" fill="#f2e3bf"/>
+      <path d="M520,760 L300,705 L300,830 L520,880Z" fill="#e6d3a6"/>
+      <g stroke="#a88f5f" stroke-width="3"><path d="M110,785 L280,742M110,810 L280,767M110,835 L280,792"/><path d="M490,785 L320,742M490,810 L320,767M490,835 L320,792"/></g>
+      <rect x="0" y="880" width="600" height="100" fill="#f2e3bf"/>
+      <text x="300" y="944" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="27" fill="#1d4f7a" letter-spacing="0">DÂN TỘC · KHOA HỌC · ĐẠI CHÚNG</text>
+      <rect x="0" y="880" width="600" height="8" fill="#d9a441"/><rect x="0" y="972" width="600" height="8" fill="#d9a441"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const mk=(tag,attrs)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e};
+
+/* ---------- vẽ chi tiết tranh cổ động ---------- */
+document.querySelectorAll("g.rays").forEach(g=>{
+  const [cx,cy,n,len,col,op]=g.dataset.rays.split(",");const N=+n,L=+len;
+  for(let i=0;i<N;i++){const a0=(i/N)*Math.PI*2,a1=a0+Math.PI/N;
+    g.appendChild(mk("path",{d:`M${cx},${cy} L${+cx+L*Math.cos(a0)},${+cy+L*Math.sin(a0)} L${+cx+L*Math.cos(a1)},${+cy+L*Math.sin(a1)}Z`,fill:col,opacity:op}));}
+});
+(function(){const g=document.getElementById("sunrays");const N=32;
+  for(let i=0;i<N;i++){const a=i/N*Math.PI*2,w=Math.PI/N*.55,r0=56,r1=i%2?84:98;
+    g.appendChild(mk("path",{d:`M${r0*Math.cos(a-w)},${r0*Math.sin(a-w)} L${r1*Math.cos(a)},${r1*Math.sin(a)} L${r0*Math.cos(a+w)},${r0*Math.sin(a+w)}Z`}));}})();
+function gearD(cx,cy,ro,ri,n){let d="";for(let i=0;i<n;i++){const s=i/n*Math.PI*2,t=Math.PI*2/n;
+  const p=[[ri,s],[ro,s+t*.15],[ro,s+t*.45],[ri,s+t*.6]];
+  p.forEach(([r,a],k)=>{d+=(i===0&&k===0?"M":"L")+(cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)+" ";});}
+  return d+"Z";}
+document.querySelectorAll("g.gear").forEach(g=>{const [cx,cy,ro,ri,n,col]=g.dataset.gear.split(",");
+  g.appendChild(mk("path",{d:gearD(+cx,+cy,+ro,+ri,+n),fill:col}));});
+document.getElementById("gearpath").setAttribute("d",gearD(0,0,80,64,16));
+document.querySelectorAll("g.crowd").forEach(g=>{const [x0,y0,n,step,col]=g.dataset.crowd.split(",");
+  for(let i=0;i<+n;i++){const x=+x0+30+i*+step,y=+y0+(i%2?12:0);
+    g.appendChild(mk("circle",{cx:x,cy:y,r:20,fill:col}));
+    g.appendChild(mk("path",{d:`M${x-34},${y+90} Q${x-34},${y+26} ${x},${y+26} Q${x+34},${y+26} ${x+34},${y+90}Z`,fill:col}));}});
+document.querySelectorAll("g.sheaf").forEach(g=>{const [bx,by]=g.dataset.sheaf.split(",").map(Number);
+  for(let i=-9;i<=9;i++){const a=i*0.085,len=300-Math.abs(i)*6,tx=bx+Math.sin(a)*len+i*4,ty=by-Math.cos(a)*len,cx=bx+i*3,cy=by-len*.55;
+    g.appendChild(mk("path",{d:`M${bx},${by} Q${cx},${cy} ${tx},${ty}`,stroke:"#c98f22",fill:"none","stroke-width":5,"stroke-linecap":"round"}));
+    for(let k=0;k<5;k++){const t=.62+k*.08,qx=(1-t)*(1-t)*bx+2*(1-t)*t*cx+t*t*tx,qy=(1-t)*(1-t)*by+2*(1-t)*t*cy+t*t*ty;
+      g.appendChild(mk("ellipse",{cx:qx+(k%2?7:-7),cy:qy,rx:5,ry:10,fill:"#f2c94c",transform:`rotate(${(k%2?25:-25)+i*4} ${qx} ${qy})`}));}}
+  g.appendChild(mk("rect",{x:bx-28,y:by-150,width:56,height:22,rx:6,fill:"#9b1c2c"}));});
+
+/* ---------- dòng thời gian (Slide 3) — trích nguyên văn mục 1.1.1, 2.2.5 ---------- */
+const TL=[
+ ["2-1951","Đại hội II của Đảng","“Đường lối chính trị, nền nếp làm việc và đạo đức cách mạng của Đảng ta hiện nay là đường lối, tác phong và đạo đức Hồ Chủ tịch…”","var(--crimson)"],
+ ["1946-1954","Kháng chiến chống Pháp","…hoàn thiện lý luận cách mạng dân tộc dân chủ nhân dân ở Việt Nam, và <b>từng bước hình thành tư tưởng về xây dựng chủ nghĩa xã hội ở Việt Nam</b>.","var(--brass)"],
+ ["1954","Hòa bình lập lại","Hòa bình lập lại ở miền Bắc Việt Nam; và <b>miền Bắc bắt đầu bước vào thời kỳ quá độ lên chủ nghĩa xã hội</b>.","var(--olive)"],
+ ["1954-1969","Hai nhiệm vụ chiến lược","Hồ Chí Minh lãnh đạo thực hiện cùng một lúc 2 nhiệm vụ chiến lược…: <b>Xây dựng chủ nghĩa xã hội ở miền Bắc</b>; tiếp tục cuộc cách mạng dân tộc dân chủ nhân dân ở miền Nam…","var(--teal)"],
+ ["17-7-1966","Chân lý lớn của thời đại","<b>Không có gì quý hơn độc lập, tự do.</b>","var(--maroon)"],
+ ["1969","Di chúc","…một văn kiện lịch sử vô giá, kết tinh tư tưởng, trí tuệ, tâm hồn, đạo đức của một lãnh tụ thiên tài…","var(--navy)"],
+ ["12-1976","Đại hội IV của Đảng","“Thắng lợi to lớn của sự nghiệp chống Mỹ, cứu nước … <b>mãi mãi gắn liền với tên tuổi của Chủ tịch Hồ Chí Minh</b>…”","var(--peace)"]
+];
+(function(){const box=document.getElementById("tl");
+  // thẻ phía trên chia 4 cột, phía dưới chia 3 cột; thứ tự thời gian vẫn xen kẽ trên/dưới
+  TL.forEach((d,i)=>{const up=i%2===0,j=up?i/2:(i-1)/2,cols=up?4:3,left=(j+.5)/cols*100,w=up?410:540;
+    const dot=document.createElement("div");dot.className="rv";
+    dot.style.cssText=`position:absolute;left:${left}%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--ivory);border:6px solid ${d[3]};box-shadow:0 0 0 5px rgba(247,239,220,.9)`;
+    const stem=document.createElement("div");
+    stem.style.cssText=`position:absolute;left:${left}%;width:2px;margin-left:-1px;background:${d[3]};opacity:.6;${up?"bottom:50%;height:38px;margin-bottom:15px":"top:50%;height:38px;margin-top:15px"}`;
+    const c=document.createElement("div");c.className="card tint rv";
+    c.style.cssText=`--c:${d[3]};position:absolute;left:${left}%;width:${w}px;margin-left:${-w/2}px;padding:16px 20px;${up?"bottom:calc(50% + 52px)":"top:calc(50% + 52px)"};border-top:6px solid ${d[3]}`;
+    c.innerHTML=`<div style="font:800 30px/1 var(--display);color:${d[3]}">${d[0]}</div><div style="font:800 15px/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:6px 0 8px">${d[1]}</div><p style="font:400 19.5px/1.45 var(--sans)">${d[2]}</p>`;
+    box.append(stem,dot,c);});
+})();
+
+/* ---------- bố trí canvas vô hạn ---------- */
+const world=document.getElementById("world"),vp=document.getElementById("viewport");
+const slides=[...document.querySelectorAll(".slide")];
+const P=slides.map(s=>{const [x,y,r,sc]=s.dataset.pos.split(",").map(Number);
+  s.style.left=(x-960)+"px";s.style.top=(y-540)+"px";s.style.transform=`rotate(${r}deg) scale(${sc})`;return {x,y,r,s:sc};});
+let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+P.forEach(p=>{const hw=1100*p.s,hh=700*p.s;minX=Math.min(minX,p.x-hw);maxX=Math.max(maxX,p.x+hw);minY=Math.min(minY,p.y-hh);maxY=Math.max(maxY,p.y+hh);});
+const M=500,plane=document.getElementById("plane");
+Object.assign(plane.style,{left:(minX-M)+"px",top:(minY-M)+"px",width:(maxX-minX+2*M)+"px",height:(maxY-minY+2*M)+"px"});
+// đường nối các slide
+const route=document.getElementById("route");
+Object.assign(route.style,{left:"0px",top:"0px",width:"1px",height:"1px"});
+let d="M"+P[0].x+","+P[0].y;
+for(let i=1;i<P.length;i++){const a=P[i-1],b=P[i],mx=(a.x+b.x)/2+(b.y-a.y)*.18,my=(a.y+b.y)/2-(b.x-a.x)*.18;d+=` Q${mx},${my} ${b.x},${b.y}`;}
+route.appendChild(mk("path",{d,fill:"none",stroke:"#9b1c2c","stroke-width":14,"stroke-dasharray":"2 34","stroke-linecap":"round",opacity:".45"}));
+route.appendChild(mk("path",{d,fill:"none",stroke:"#a87a22","stroke-width":3,opacity:".35"}));
+// họa tiết chìm trên mặt phẳng
+[[1200,-1500,1400,"sym-sunstar"],[8200,-900,1200,"sym-lotus"],[-1600,1600,1100,"sym-lotus"],[6000,4300,1500,"sym-sunstar"],[11200,3200,1100,"sym-gear"],[15600,4600,1300,"sym-lotus"],[3600,8000,1200,"sym-sunstar"],[9800,7900,1000,"sym-lotus"],[15000,-500,900,"sym-star"]].forEach(([x,y,s,id])=>{
+  const sv=mk("svg",{viewBox:id==="sym-star"?"-50 -50 100 100":"-100 -100 200 200",width:s,height:s,class:"mark"});
+  sv.style.cssText=`left:${x-s/2}px;top:${y-s/2}px;color:#6e1423;fill:${id==="sym-star"?"#6e1423":"none"};opacity:.1`;
+  const h=id==="sym-star"?50:100;
+  const u=mk("use",{href:"#"+id,x:-h,y:-h,width:2*h,height:2*h});if(id!=="sym-star")u.setAttribute("color","#6e1423");sv.appendChild(u);world.insertBefore(sv,route);});
+
+/* ---------- camera ---------- */
+if(window.gsap)gsap.ticker.lagSmoothing(0); // chuyển cảnh luôn đúng thời lượng, kể cả khi máy chậm
+const cam={x:P[0].x,y:P[0].y,r:0,k:1};
+let cur=0,overview=false,tween=null;
+const VW=()=>vp.clientWidth,VH=()=>vp.clientHeight;
+const fitK=i=>Math.min(VW()/1920,VH()/1080)/P[i].s;
+function apply(){world.style.transform=`translate(${VW()/2}px,${VH()/2}px) scale(${cam.k}) rotate(${-cam.r}deg) translate(${-cam.x}px,${-cam.y}px)`;}
+function killTween(){if(tween){tween.kill();tween=null;}}
+function flyTo(t,dur){killTween();
+  if(!window.gsap||dur===0){Object.assign(cam,t);apply();return;}
+  world.classList.add("moving");
+  const dist=Math.hypot(t.x-cam.x,t.y-cam.y);
+  const kMid=Math.min(cam.k,t.k,Math.min(VW(),VH())*1.25/(dist+1400));
+  const tl=gsap.timeline({onUpdate:apply,onComplete:()=>{world.classList.remove("moving");tween=null;}});
+  const D=dur||Math.min(1.9,.9+dist/6000);
+  tl.to(cam,{x:t.x,y:t.y,r:t.r,duration:D,ease:"power2.inOut"},0);
+  if(kMid<Math.min(cam.k,t.k)*.97){tl.to(cam,{k:kMid,duration:D*.5,ease:"power2.in"},0).to(cam,{k:t.k,duration:D*.5,ease:"power2.out"},D*.5);}
+  else tl.to(cam,{k:t.k,duration:D,ease:"power2.inOut"},0);
+  tween=tl;}
+function reveal(i){if(!window.gsap)return;const els=slides[i].querySelectorAll(".rv");
+  gsap.fromTo(els,{opacity:0,y:26},{opacity:1,y:0,duration:.6,stagger:.06,delay:.55,ease:"power2.out",overwrite:true});}
+function go(i,opts={}){i=Math.max(0,Math.min(slides.length-1,i));const prev=cur;cur=i;overview=false;
+  slides.forEach((s,j)=>s.classList.toggle("current",j===i));
+  flyTo({x:P[i].x,y:P[i].y,r:P[i].r,k:fitK(i)},opts.instant?0:undefined);
+  if(!opts.instant&&(i!==prev||opts.force))reveal(i);
+  document.getElementById("counter").textContent=`${i+1} / ${slides.length}`;
+  document.getElementById("progress").style.width=((i+1)/slides.length*100)+"%";
+  document.getElementById("bOver").textContent="TOÀN CẢNH";
+  try{history.replaceState(null,"","#"+(i+1));}catch(e){}}
+function showOverview(){overview=true;slides.forEach(s=>s.classList.remove("current"));
+  const k=Math.min(VW()/(maxX-minX+400),VH()/(maxY-minY+400));
+  flyTo({x:(minX+maxX)/2,y:(minY+maxY)/2,r:0,k},1.4);
+  document.getElementById("bOver").textContent="QUAY LẠI";}
+
+/* ---------- điều khiển ---------- */
+document.addEventListener("keydown",e=>{
+  if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();go(overview?cur:cur+1,{force:overview});}
+  else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();go(overview?cur:cur-1,{force:overview});}
+  else if(e.key==="Home")go(0);else if(e.key==="End")go(slides.length-1);
+  else if(e.key==="o"||e.key==="O"||e.key==="Escape"){overview&&e.key!=="Escape"?go(cur,{force:true}):showOverview();}
+  else if(e.key==="f"||e.key==="F")toggleFS();});
+document.getElementById("bPrev").onclick=()=>go(cur-1);
+document.getElementById("bNext").onclick=()=>go(cur+1);
+document.getElementById("bOver").onclick=()=>overview?go(cur,{force:true}):showOverview();
+document.getElementById("bFull").onclick=toggleFS;
+function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
+
+// kéo để di chuyển, lăn để phóng to — cảm giác canvas vô hạn
+let drag=null,moved=false;
+vp.addEventListener("pointerdown",e=>{if(e.button!==0)return;killTween();drag={sx:e.clientX,sy:e.clientY,x:cam.x,y:cam.y};moved=false;});
+window.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
+  if(!moved&&Math.hypot(dx,dy)<5)return;moved=true;vp.classList.add("dragging");
+  const a=cam.r*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  cam.x=drag.x-(dx*c-dy*s)/cam.k;cam.y=drag.y-(dx*s+dy*c)/cam.k;apply();});
+window.addEventListener("pointerup",e=>{if(!drag)return;vp.classList.remove("dragging");
+  if(!moved){const s=e.target.closest(".slide");if(s){const i=slides.indexOf(s);if(overview||i!==cur)go(i,{force:true});}}
+  drag=null;});
+vp.addEventListener("wheel",e=>{e.preventDefault();killTween();
+  const f=Math.exp(-e.deltaY*.0015),nk=Math.max(.02,Math.min(3,cam.k*f));
+  const a=cam.r*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  const ox=e.clientX-VW()/2,oy=e.clientY-VH()/2;
+  const wx=cam.x+(ox*c-oy*s)/cam.k,wy=cam.y+(ox*s+oy*c)/cam.k;
+  cam.k=nk;cam.x=wx-(ox*c-oy*s)/nk;cam.y=wy-(ox*s+oy*c)/nk;apply();},{passive:false});
+// vuốt trên màn hình cảm ứng
+let tx0=null;vp.addEventListener("touchstart",e=>{tx0=e.touches[0].clientX},{passive:true});
+vp.addEventListener("touchend",e=>{if(tx0==null)return;const dx=e.changedTouches[0].clientX-tx0;if(Math.abs(dx)>60)go(cur+(dx<0?1:-1));tx0=null;});
+window.addEventListener("hashchange",()=>{const i=(parseInt(location.hash.slice(1))||1)-1;if(i!==cur)go(i);});
+window.addEventListener("resize",()=>{overview?showOverview():go(cur,{instant:true});});
+// ẩn thanh điều khiển khi không dùng chuột
+let idleT;const wake=()=>{document.body.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>document.body.classList.add("idle"),2600);};
+["mousemove","keydown","pointerdown"].forEach(ev=>window.addEventListener(ev,wake));wake();
+
+const start=Math.max(0,Math.min(slides.length-1,(parseInt(location.hash.slice(1))||1)-1));
+cam.x=P[start].x;cam.y=P[start].y;cam.r=P[start].r;cam.k=fitK(start)*.35;apply();
+go(start,{force:true});
+})();
+</script>
+</body>
+</html>
